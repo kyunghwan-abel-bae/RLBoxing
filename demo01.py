@@ -27,14 +27,15 @@ while running:
     '''
 
     score = 0
-    for t in range(1000):  # 최대 1000번 반복
+
+    for t in range(3000):  # 최대 3000번 반복
         env.render() # in LOOP
 
         action = env.action_space.sample()  # 무작위로 행동 선택
 
         observation, reward, terminated, truncated, info = env.step(action)
         # action test
-        # observation, reward, terminated, truncated, info = env.step(1)
+        # observation, reward, terminated, truncated, info = env.step(16)
 
         if terminated:
             print("DONE")
