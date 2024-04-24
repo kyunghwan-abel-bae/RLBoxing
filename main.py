@@ -36,7 +36,7 @@ agent = Agent(state_dim=(4, 84, 84), action_dim=env.action_space.n, save_dir=sav
 
 logger = MetricLogger(save_dir)
 
-episodes = 20000
+episodes = 40000
 total_reward = 0
 for e in range(episodes):
     state = env.reset()
