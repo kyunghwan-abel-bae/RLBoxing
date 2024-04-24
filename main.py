@@ -17,7 +17,7 @@ env = gym.make('BoxingDeterministic-v4', render_mode="rgb_array")
 # env = gym.make('BoxingDeterministic-v4', render_mode="human")
 # env = gym.make('BoxingNoFrameskip-v4', render_mode="rgb_array")
 
-env.observation_space = Box(low=0, high=255, shape=(210, 160, 3), dtype=np.int)
+env.observation_space = Box(low=0, high=255, shape=(210, 160, 3), dtype=np.int32)
 
 env = SkipFrame(env, skip=1)
 env = GrayScaleObservation(env, keep_dim=False)
