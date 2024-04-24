@@ -9,7 +9,7 @@ from gym.wrappers import FrameStack, GrayScaleObservation, TransformObservation
 
 from agent import Agent
 from metrics import MetricLogger
-from wrappers import ResizeObservation, SkipFrame
+from wrappers import ResizeObservation, AdapterGrayScaleObservation
 
 import numpy as np
 
@@ -19,7 +19,7 @@ env = gym.make('BoxingDeterministic-v4', render_mode="rgb_array")
 
 env.observation_space = Box(low=0, high=255, shape=(210, 160, 3), dtype=np.int32)
 
-env = SkipFrame(env, skip=1)
+env = AdapterGrayScaleObservation(env)
 env = GrayScaleObservation(env, keep_dim=False)
 env = ResizeObservation(env, shape=84)
 env = TransformObservation(env, f=lambda x: x / 255.)
@@ -62,7 +62,7 @@ for e in range(episodes):
 
     logger.log_episode()
 
-    if e % 20 == 0:
+    if e % 50 == 0:
         logger.record(
             episode=e,
             epsilon=agent.exploration_rate,
