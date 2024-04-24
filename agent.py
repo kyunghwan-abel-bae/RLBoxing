@@ -23,8 +23,8 @@ class Agent:
         self.learn_every = 3  # no. of experiences between updates to Q_online
         self.sync_every = 1e4  # no. of experiences between Q_target & Q_online sync
 
-        # self.save_every = 5e5  # no. of experiences between saving Mario Net
-        self.save_every = 1000  # no. of experiences between saving Mario Net
+        # self.save_every = 5e5  # no. of experiences between saving Boxing Net
+        self.save_every = 10000  # no. of experiences between saving Boxing Net
         self.save_dir = save_dir
 
         self.use_cuda = torch.cuda.is_available()
@@ -123,8 +123,8 @@ class Agent:
         if self.curr_step % self.sync_every == 0:
             self.sync_Q_target()
 
-        if self.curr_step % self.save_every == 0:
-            self.save()
+        # if self.curr_step % self.save_every == 0:
+        #     self.save()
 
         if self.curr_step < self.burnin:
             return None, None

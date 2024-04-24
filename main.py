@@ -68,3 +68,5 @@ for e in range(episodes):
             epsilon=agent.exploration_rate,
             step=agent.curr_step
         )
+
+        agent.save()
