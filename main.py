@@ -7,12 +7,14 @@ import gymnasium as gym
 from gym.spaces import Box
 from gym.wrappers import FrameStack, GrayScaleObservation, TransformObservation
 
+from agent import Agent
 from metrics import MetricLogger
 from wrappers import ResizeObservation, SkipFrame
 
 import numpy as np
 
 env = gym.make('BoxingDeterministic-v4', render_mode="rgb_array")
+# env = gym.make('BoxingDeterministic-v4', render_mode="human")
 # env = gym.make('BoxingNoFrameskip-v4', render_mode="rgb_array")
 
 env.observation_space = Box(low=0, high=255, shape=(210, 160, 3), dtype=np.int)
@@ -30,13 +32,39 @@ save_dir.mkdir(parents=True)
 
 checkpoint = None # Path('checkpoints/2020-10-21T18-25-27/mario.chkpt')
 
-# agent
+agent = Agent(state_dim=(4, 84, 84), action_dim=env.action_space.n, save_dir=save_dir, checkpoint=checkpoint)
 
 logger = MetricLogger(save_dir)
 
-episodes = 100
-
+episodes = 20000
+total_reward = 0
 for e in range(episodes):
     state = env.reset()
-    print(f"state.shape : {state[0].shape}")
-    break
+
+    while True:
+        action = agent.act(state)
+
+        next_state, reward, done, info = env.step(action)
+
+        total_reward += reward if reward > 0 else 0
+
+        agent.cache(state, next_state, action, reward, done)
+        # print(f"reward : {total_reward}")
+
+        q, loss = agent.learn()
+
+        logger.log_step(reward, loss, q)
+
+        state = next_state
+
+        if done or (total_reward > 199):
+            break
+
+    logger.log_episode()
+
+    if e % 20 == 0:
+        logger.record(
+            episode=e,
+            epsilon=agent.exploration_rate,
+            step=agent.curr_step
+        )
