@@ -1,0 +1,170 @@
+Episode 0 - Step 1786 - Epsilon 0.9995535996104401 - Mean Reward 28518.0 - Mean Length 1786.0 - Mean Loss 0.023 - Mean Q Value 0.026 - Time Delta 21.954 - Time 2024-04-26T09:02:15
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_0.chkpt at step 1786
+Episode 50 - Step 91086 - Epsilon 0.9774858109798313 - Mean Reward 27649.647 - Mean Length 1786.0 - Mean Loss 0.022 - Mean Q Value 0.091 - Time Delta 1039.761 - Time 2024-04-26T09:19:35
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_9.chkpt at step 91086
+Episode 100 - Step 180386 - Epsilon 0.9559052271326721 - Mean Reward 27573.83 - Mean Length 1786.0 - Mean Loss 0.021 - Mean Q Value 0.101 - Time Delta 1049.019 - Time 2024-04-26T09:37:04
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_18.chkpt at step 180386
+Episode 150 - Step 269686 - Epsilon 0.9348010917351577 - Mean Reward 26754.76 - Mean Length 1786.0 - Mean Loss 0.02 - Mean Q Value 0.112 - Time Delta 1059.304 - Time 2024-04-26T09:54:44
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_26.chkpt at step 269686
+Episode 200 - Step 358986 - Epsilon 0.9141628859279628 - Mean Reward 26744.33 - Mean Length 1786.0 - Mean Loss 0.02 - Mean Q Value 0.11 - Time Delta 1071.645 - Time 2024-04-26T10:12:35
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_35.chkpt at step 358986
+Episode 250 - Step 448286 - Epsilon 0.8939803230834643 - Mean Reward 28447.3 - Mean Length 1786.0 - Mean Loss 0.022 - Mean Q Value 0.116 - Time Delta 1080.724 - Time 2024-04-26T10:30:36
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_44.chkpt at step 448286
+Episode 300 - Step 537586 - Epsilon 0.8742433436784327 - Mean Reward 28717.25 - Mean Length 1786.0 - Mean Loss 0.022 - Mean Q Value 0.115 - Time Delta 1088.159 - Time 2024-04-26T10:48:44
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_53.chkpt at step 537586
+Episode 350 - Step 626886 - Epsilon 0.8549421102803186 - Mean Reward 28117.16 - Mean Length 1786.0 - Mean Loss 0.022 - Mean Q Value 0.102 - Time Delta 1079.39 - Time 2024-04-26T11:06:43
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_62.chkpt at step 626886
+Episode 400 - Step 716186 - Epsilon 0.8360670026438457 - Mean Reward 28305.1 - Mean Length 1786.0 - Mean Loss 0.021 - Mean Q Value 0.106 - Time Delta 1088.532 - Time 2024-04-26T11:24:52
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_71.chkpt at step 716186
+Episode 450 - Step 805486 - Epsilon 0.8176086129161088 - Mean Reward 29163.3 - Mean Length 1786.0 - Mean Loss 0.022 - Mean Q Value 0.113 - Time Delta 1140.186 - Time 2024-04-26T11:43:52
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_80.chkpt at step 805486
+Episode 500 - Step 894786 - Epsilon 0.7995577409474465 - Mean Reward 29450.31 - Mean Length 1786.0 - Mean Loss 0.023 - Mean Q Value 0.113 - Time Delta 1108.797 - Time 2024-04-26T12:02:21
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_89.chkpt at step 894786
+Episode 550 - Step 984086 - Epsilon 0.7819053897057645 - Mean Reward 29477.49 - Mean Length 1786.0 - Mean Loss 0.023 - Mean Q Value 0.109 - Time Delta 1117.031 - Time 2024-04-26T12:20:58
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_98.chkpt at step 984086
+Episode 600 - Step 1073386 - Epsilon 0.7646427607923203 - Mean Reward 29615.7 - Mean Length 1786.0 - Mean Loss 0.023 - Mean Q Value 0.105 - Time Delta 1121.376 - Time 2024-04-26T12:39:39
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_107.chkpt at step 1073386
+Episode 650 - Step 1162686 - Epsilon 0.747761250056255 - Mean Reward 28993.74 - Mean Length 1786.0 - Mean Loss 0.023 - Mean Q Value 0.1 - Time Delta 1126.833 - Time 2024-04-26T12:58:26
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_116.chkpt at step 1162686
+Episode 700 - Step 1251986 - Epsilon 0.7312524433060787 - Mean Reward 29438.86 - Mean Length 1786.0 - Mean Loss 0.024 - Mean Q Value 0.098 - Time Delta 1139.594 - Time 2024-04-26T13:17:26
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_125.chkpt at step 1251986
+Episode 750 - Step 1341286 - Epsilon 0.7151081121158502 - Mean Reward 30651.88 - Mean Length 1786.0 - Mean Loss 0.025 - Mean Q Value 0.099 - Time Delta 1138.424 - Time 2024-04-26T13:36:24
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_134.chkpt at step 1341286
+Episode 800 - Step 1430586 - Epsilon 0.6993202097238694 - Mean Reward 31404.44 - Mean Length 1786.0 - Mean Loss 0.025 - Mean Q Value 0.103 - Time Delta 1150.273 - Time 2024-04-26T13:55:35
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_143.chkpt at step 1430586
+Episode 850 - Step 1519886 - Epsilon 0.6838808670219768 - Mean Reward 30509.47 - Mean Length 1786.0 - Mean Loss 0.024 - Mean Q Value 0.103 - Time Delta 1154.083 - Time 2024-04-26T14:14:49
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_151.chkpt at step 1519886
+Episode 900 - Step 1609186 - Epsilon 0.6687823886333814 - Mean Reward 29207.37 - Mean Length 1786.0 - Mean Loss 0.024 - Mean Q Value 0.098 - Time Delta 1157.518 - Time 2024-04-26T14:34:06
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_160.chkpt at step 1609186
+Episode 950 - Step 1698486 - Epsilon 0.6540172490770971 - Mean Reward 28989.26 - Mean Length 1786.0 - Mean Loss 0.023 - Mean Q Value 0.093 - Time Delta 1164.817 - Time 2024-04-26T14:53:31
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_169.chkpt at step 1698486
+Episode 1000 - Step 1787786 - Epsilon 0.6395780890170091 - Mean Reward 29073.65 - Mean Length 1786.0 - Mean Loss 0.023 - Mean Q Value 0.089 - Time Delta 1171.996 - Time 2024-04-26T15:13:03
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_178.chkpt at step 1787786
+Episode 1050 - Step 1877086 - Epsilon 0.6254577115938414 - Mean Reward 29327.87 - Mean Length 1786.0 - Mean Loss 0.024 - Mean Q Value 0.082 - Time Delta 1177.231 - Time 2024-04-26T15:32:40
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_187.chkpt at step 1877086
+Episode 1100 - Step 1966386 - Epsilon 0.6116490788379589 - Mean Reward 29227.03 - Mean Length 1786.0 - Mean Loss 0.024 - Mean Q Value 0.083 - Time Delta 1188.598 - Time 2024-04-26T15:52:29
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_196.chkpt at step 1966386
+Episode 1150 - Step 2055686 - Epsilon 0.5981453081615884 - Mean Reward 30025.96 - Mean Length 1786.0 - Mean Loss 0.025 - Mean Q Value 0.081 - Time Delta 1189.867 - Time 2024-04-26T16:12:19
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_205.chkpt at step 2055686
+Episode 1200 - Step 2144986 - Epsilon 0.584939668928178 - Mean Reward 31058.98 - Mean Length 1786.0 - Mean Loss 0.026 - Mean Q Value 0.073 - Time Delta 1198.142 - Time 2024-04-26T16:32:17
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_214.chkpt at step 2144986
+Episode 1250 - Step 2234286 - Epsilon 0.5720255790978812 - Mean Reward 30953.06 - Mean Length 1786.0 - Mean Loss 0.025 - Mean Q Value 0.078 - Time Delta 1208.154 - Time 2024-04-26T16:52:25
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_223.chkpt at step 2234286
+Episode 1300 - Step 2323586 - Epsilon 0.559396601946727 - Mean Reward 29681.42 - Mean Length 1786.0 - Mean Loss 0.025 - Mean Q Value 0.084 - Time Delta 1209.476 - Time 2024-04-26T17:12:34
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_232.chkpt at step 2323586
+Episode 1350 - Step 2412886 - Epsilon 0.5470464428584516 - Mean Reward 28151.07 - Mean Length 1786.0 - Mean Loss 0.024 - Mean Q Value 0.08 - Time Delta 1213.231 - Time 2024-04-26T17:32:48
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_241.chkpt at step 2412886
+Episode 1400 - Step 2502186 - Epsilon 0.5349689461871007 - Mean Reward 30494.11 - Mean Length 1786.0 - Mean Loss 0.026 - Mean Q Value 0.072 - Time Delta 1217.564 - Time 2024-04-26T17:53:05
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_250.chkpt at step 2502186
+Episode 1450 - Step 2591486 - Epsilon 0.5231580921888838 - Mean Reward 30673.28 - Mean Length 1786.0 - Mean Loss 0.026 - Mean Q Value 0.07 - Time Delta 1228.89 - Time 2024-04-26T18:13:34
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_259.chkpt at step 2591486
+Episode 1500 - Step 2680786 - Epsilon 0.5116079940217362 - Mean Reward 27496.56 - Mean Length 1786.0 - Mean Loss 0.023 - Mean Q Value 0.07 - Time Delta 1230.03 - Time 2024-04-26T18:34:04
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_268.chkpt at step 2680786
+Episode 1550 - Step 2770086 - Epsilon 0.5003128948112429 - Mean Reward 28156.24 - Mean Length 1786.0 - Mean Loss 0.024 - Mean Q Value 0.066 - Time Delta 1237.398 - Time 2024-04-26T18:54:42
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_277.chkpt at step 2770086
+Episode 1600 - Step 2859386 - Epsilon 0.4892671647811968 - Mean Reward 29573.19 - Mean Length 1786.0 - Mean Loss 0.025 - Mean Q Value 0.067 - Time Delta 1234.45 - Time 2024-04-26T19:15:16
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_285.chkpt at step 2859386
+Episode 1650 - Step 2948686 - Epsilon 0.47846529844757196 - Mean Reward 30727.83 - Mean Length 1786.0 - Mean Loss 0.026 - Mean Q Value 0.073 - Time Delta 1251.709 - Time 2024-04-26T19:36:08
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_294.chkpt at step 2948686
+Episode 1700 - Step 3037986 - Epsilon 0.4679019118744722 - Mean Reward 29944.13 - Mean Length 1786.0 - Mean Loss 0.026 - Mean Q Value 0.075 - Time Delta 1269.216 - Time 2024-04-26T19:57:17
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_303.chkpt at step 3037986
+Episode 1750 - Step 3127286 - Epsilon 0.45757173999061684 - Mean Reward 29080.14 - Mean Length 1786.0 - Mean Loss 0.026 - Mean Q Value 0.07 - Time Delta 1270.697 - Time 2024-04-26T20:18:28
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_312.chkpt at step 3127286
+Episode 1800 - Step 3216586 - Epsilon 0.4474696339651095 - Mean Reward 29031.65 - Mean Length 1786.0 - Mean Loss 0.026 - Mean Q Value 0.061 - Time Delta 1275.879 - Time 2024-04-26T20:39:43
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_321.chkpt at step 3216586
+Episode 1850 - Step 3305886 - Epsilon 0.43759055864108226 - Mean Reward 27153.74 - Mean Length 1786.0 - Mean Loss 0.024 - Mean Q Value 0.056 - Time Delta 1280.479 - Time 2024-04-26T21:01:04
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_330.chkpt at step 3305886
+Episode 1900 - Step 3395186 - Epsilon 0.42792959002609776 - Mean Reward 26208.61 - Mean Length 1786.0 - Mean Loss 0.023 - Mean Q Value 0.051 - Time Delta 1285.716 - Time 2024-04-26T21:22:30
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_339.chkpt at step 3395186
+Episode 1950 - Step 3484486 - Epsilon 0.41848191283784286 - Mean Reward 26227.64 - Mean Length 1786.0 - Mean Loss 0.024 - Mean Q Value 0.044 - Time Delta 1290.939 - Time 2024-04-26T21:44:01
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_348.chkpt at step 3484486
+Episode 2000 - Step 3573786 - Epsilon 0.4092428181041205 - Mean Reward 27448.8 - Mean Length 1786.0 - Mean Loss 0.025 - Mean Q Value 0.048 - Time Delta 1296.133 - Time 2024-04-26T22:05:37
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_357.chkpt at step 3573786
+Episode 2050 - Step 3663086 - Epsilon 0.40020770081572055 - Mean Reward 30736.74 - Mean Length 1786.0 - Mean Loss 0.026 - Mean Q Value 0.06 - Time Delta 1302.043 - Time 2024-04-26T22:27:19
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_366.chkpt at step 3663086
+Episode 2100 - Step 3752386 - Epsilon 0.391372057631221 - Mean Reward 31335.98 - Mean Length 1786.0 - Mean Loss 0.027 - Mean Q Value 0.056 - Time Delta 1307.339 - Time 2024-04-26T22:49:06
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_375.chkpt at step 3752386
+Episode 2150 - Step 3841686 - Epsilon 0.3827314846323373 - Mean Reward 29710.49 - Mean Length 1786.0 - Mean Loss 0.027 - Mean Q Value 0.048 - Time Delta 1307.125 - Time 2024-04-26T23:10:53
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_384.chkpt at step 3841686
+Episode 2200 - Step 3930986 - Epsilon 0.37428167512894506 - Mean Reward 27411.92 - Mean Length 1786.0 - Mean Loss 0.026 - Mean Q Value 0.043 - Time Delta 1318.675 - Time 2024-04-26T23:32:52
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_393.chkpt at step 3930986
+Episode 2250 - Step 4020286 - Epsilon 0.3660184175124732 - Mean Reward 24251.22 - Mean Length 1786.0 - Mean Loss 0.023 - Mean Q Value 0.034 - Time Delta 1312.951 - Time 2024-04-26T23:54:45
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_402.chkpt at step 4020286
+Episode 2300 - Step 4109586 - Epsilon 0.3579375931567614 - Mean Reward 24774.86 - Mean Length 1786.0 - Mean Loss 0.023 - Mean Q Value 0.034 - Time Delta 1308.007 - Time 2024-04-27T00:16:33
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_410.chkpt at step 4109586
+Episode 2350 - Step 4198886 - Epsilon 0.35003517436519765 - Mean Reward 25815.74 - Mean Length 1786.0 - Mean Loss 0.023 - Mean Q Value 0.039 - Time Delta 1316.281 - Time 2024-04-27T00:38:29
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_419.chkpt at step 4198886
+Episode 2400 - Step 4288186 - Epsilon 0.34230722236324584 - Mean Reward 25094.99 - Mean Length 1786.0 - Mean Loss 0.024 - Mean Q Value 0.04 - Time Delta 1313.275 - Time 2024-04-27T01:00:22
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_428.chkpt at step 4288186
+Episode 2450 - Step 4377486 - Epsilon 0.3347498853352124 - Mean Reward 26368.64 - Mean Length 1786.0 - Mean Loss 0.025 - Mean Q Value 0.034 - Time Delta 1318.791 - Time 2024-04-27T01:22:21
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_437.chkpt at step 4377486
+Episode 2500 - Step 4466786 - Epsilon 0.32735939650442025 - Mean Reward 26912.65 - Mean Length 1786.0 - Mean Loss 0.026 - Mean Q Value 0.034 - Time Delta 1320.468 - Time 2024-04-27T01:44:22
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_446.chkpt at step 4466786
+Episode 2550 - Step 4556086 - Epsilon 0.3201320722557537 - Mean Reward 25136.4 - Mean Length 1786.0 - Mean Loss 0.025 - Mean Q Value 0.036 - Time Delta 1329.03 - Time 2024-04-27T02:06:31
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_455.chkpt at step 4556086
+Episode 2600 - Step 4645386 - Epsilon 0.31306431029964055 - Mean Reward 25791.4 - Mean Length 1786.0 - Mean Loss 0.025 - Mean Q Value 0.03 - Time Delta 1326.616 - Time 2024-04-27T02:28:37
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_464.chkpt at step 4645386
+Episode 2650 - Step 4734686 - Epsilon 0.3061525878765873 - Mean Reward 25134.41 - Mean Length 1786.0 - Mean Loss 0.025 - Mean Q Value 0.025 - Time Delta 1336.838 - Time 2024-04-27T02:50:54
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_473.chkpt at step 4734686
+Episode 2700 - Step 4823976 - Epsilon 0.29939420848596865 - Mean Reward 24440.39 - Mean Length 1785.9 - Mean Loss 0.024 - Mean Q Value 0.026 - Time Delta 1335.258 - Time 2024-04-27T03:13:09
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_482.chkpt at step 4823976
+Episode 2750 - Step 4913276 - Epsilon 0.2927842897055519 - Mean Reward 26346.16 - Mean Length 1785.9 - Mean Loss 0.026 - Mean Q Value 0.025 - Time Delta 1347.666 - Time 2024-04-27T03:35:37
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_491.chkpt at step 4913276
+Episode 2800 - Step 5002576 - Epsilon 0.2863203023594991 - Mean Reward 25548.01 - Mean Length 1786.0 - Mean Loss 0.026 - Mean Q Value 0.026 - Time Delta 1355.962 - Time 2024-04-27T03:58:13
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_500.chkpt at step 5002576
+Episode 2850 - Step 5091876 - Epsilon 0.2799990246255292 - Mean Reward 23212.14 - Mean Length 1786.0 - Mean Loss 0.023 - Mean Q Value 0.028 - Time Delta 1345.477 - Time 2024-04-27T04:20:39
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_509.chkpt at step 5091876
+Episode 2900 - Step 5181176 - Epsilon 0.2738173058116274 - Mean Reward 22840.84 - Mean Length 1786.0 - Mean Loss 0.022 - Mean Q Value 0.026 - Time Delta 1352.792 - Time 2024-04-27T04:43:11
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_518.chkpt at step 5181176
+Episode 2950 - Step 5270112 - Epsilon 0.2677964331553201 - Mean Reward 22984.16 - Mean Length 1782.36 - Mean Loss 0.022 - Mean Q Value 0.021 - Time Delta 1343.072 - Time 2024-04-27T05:05:34
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_527.chkpt at step 5270112
+Episode 3000 - Step 5359412 - Epsilon 0.26188411881299045 - Mean Reward 22993.26 - Mean Length 1782.36 - Mean Loss 0.023 - Mean Q Value 0.022 - Time Delta 1351.513 - Time 2024-04-27T05:28:06
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_535.chkpt at step 5359412
+Episode 3050 - Step 5448712 - Epsilon 0.25610233444251823 - Mean Reward 24318.43 - Mean Length 1786.0 - Mean Loss 0.024 - Mean Q Value 0.025 - Time Delta 1358.188 - Time 2024-04-27T05:50:44
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_544.chkpt at step 5448712
+Episode 3100 - Step 5538012 - Epsilon 0.2504481982496352 - Mean Reward 24129.71 - Mean Length 1786.0 - Mean Loss 0.024 - Mean Q Value 0.018 - Time Delta 1359.368 - Time 2024-04-27T06:13:23
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_553.chkpt at step 5538012
+Episode 3150 - Step 5627272 - Epsilon 0.24492134126478204 - Mean Reward 24300.68 - Mean Length 1785.6 - Mean Loss 0.026 - Mean Q Value 0.01 - Time Delta 1357.965 - Time 2024-04-27T06:36:01
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_562.chkpt at step 5627272
+Episode 3200 - Step 5716547 - Epsilon 0.23951555202766556 - Mean Reward 23716.78 - Mean Length 1785.35 - Mean Loss 0.025 - Mean Q Value 0.011 - Time Delta 1359.379 - Time 2024-04-27T06:58:41
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_571.chkpt at step 5716547
+Episode 3250 - Step 5805847 - Epsilon 0.23422761291369684 - Mean Reward 21778.94 - Mean Length 1785.75 - Mean Loss 0.023 - Mean Q Value 0.012 - Time Delta 1371.449 - Time 2024-04-27T07:21:32
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_580.chkpt at step 5805847
+Episode 3300 - Step 5895147 - Epsilon 0.22905641903750315 - Mean Reward 20598.28 - Mean Length 1786.0 - Mean Loss 0.021 - Mean Q Value 0.01 - Time Delta 1364.531 - Time 2024-04-27T07:44:17
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_589.chkpt at step 5895147
+Episode 3350 - Step 5984447 - Epsilon 0.22399939293928364 - Mean Reward 20342.64 - Mean Length 1786.0 - Mean Loss 0.022 - Mean Q Value 0.005 - Time Delta 1372.262 - Time 2024-04-27T08:07:09
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_598.chkpt at step 5984447
+Episode 3400 - Step 6073538 - Epsilon 0.21906545993614748 - Mean Reward 22824.1 - Mean Length 1783.91 - Mean Loss 0.024 - Mean Q Value 0.011 - Time Delta 1363.234 - Time 2024-04-27T08:29:52
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_607.chkpt at step 6073538
+Episode 3450 - Step 6162838 - Epsilon 0.21422901067717917 - Mean Reward 22743.48 - Mean Length 1783.91 - Mean Loss 0.025 - Mean Q Value 0.011 - Time Delta 1366.66 - Time 2024-04-27T08:52:39
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_616.chkpt at step 6162838
+Episode 3500 - Step 6251988 - Epsilon 0.2095071951971526 - Mean Reward 19876.41 - Mean Length 1784.5 - Mean Loss 0.023 - Mean Q Value -0.004 - Time Delta 1377.731 - Time 2024-04-27T09:15:37
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_625.chkpt at step 6251988
+Episode 3550 - Step 6341288 - Epsilon 0.20488176990530035 - Mean Reward 19422.76 - Mean Length 1784.5 - Mean Loss 0.022 - Mean Q Value -0.002 - Time Delta 1372.909 - Time 2024-04-27T09:38:30
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_634.chkpt at step 6341288
+Episode 3600 - Step 6430588 - Epsilon 0.20035846310685254 - Mean Reward 21098.76 - Mean Length 1786.0 - Mean Loss 0.023 - Mean Q Value 0.008 - Time Delta 1375.718 - Time 2024-04-27T10:01:25
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_643.chkpt at step 6430588
+Episode 3650 - Step 6519888 - Epsilon 0.19593502026604875 - Mean Reward 21018.53 - Mean Length 1786.0 - Mean Loss 0.023 - Mean Q Value 0.004 - Time Delta 1375.459 - Time 2024-04-27T10:24:21
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_651.chkpt at step 6519888
+Episode 3700 - Step 6609056 - Epsilon 0.19161555983191284 - Mean Reward 21677.98 - Mean Length 1784.68 - Mean Loss 0.023 - Mean Q Value 0.0 - Time Delta 1377.356 - Time 2024-04-27T10:47:18
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_660.chkpt at step 6609056
+Episode 3750 - Step 6698356 - Epsilon 0.18738513969801127 - Mean Reward 20203.86 - Mean Length 1784.68 - Mean Loss 0.022 - Mean Q Value -0.005 - Time Delta 1385.55 - Time 2024-04-27T11:10:24
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_669.chkpt at step 6698356
+Episode 3800 - Step 6787425 - Epsilon 0.18325870015989354 - Mean Reward 18825.97 - Mean Length 1783.69 - Mean Loss 0.021 - Mean Q Value -0.008 - Time Delta 1386.46 - Time 2024-04-27T11:33:30
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_678.chkpt at step 6787425
+Episode 3850 - Step 6876725 - Epsilon 0.1792127797996198 - Mean Reward 20843.63 - Mean Length 1783.69 - Mean Loss 0.023 - Mean Q Value -0.005 - Time Delta 1410.536 - Time 2024-04-27T11:57:01
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_687.chkpt at step 6876725
+Episode 3900 - Step 6966025 - Epsilon 0.17525618382911737 - Mean Reward 19028.07 - Mean Length 1786.0 - Mean Loss 0.02 - Mean Q Value -0.003 - Time Delta 1382.906 - Time 2024-04-27T12:20:04
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_696.chkpt at step 6966025
+Episode 3950 - Step 7055325 - Epsilon 0.17138694017629458 - Mean Reward 17497.61 - Mean Length 1786.0 - Mean Loss 0.02 - Mean Q Value -0.009 - Time Delta 1392.954 - Time 2024-04-27T12:43:17
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_705.chkpt at step 7055325
+Episode 4000 - Step 7144625 - Epsilon 0.16760312030777166 - Mean Reward 18249.98 - Mean Length 1786.0 - Mean Loss 0.021 - Mean Q Value -0.014 - Time Delta 1388.583 - Time 2024-04-27T13:06:25
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_714.chkpt at step 7144625
+Episode 4050 - Step 7233925 - Epsilon 0.16390283826764382 - Mean Reward 19120.76 - Mean Length 1786.0 - Mean Loss 0.022 - Mean Q Value -0.012 - Time Delta 1393.055 - Time 2024-04-27T13:29:38
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_723.chkpt at step 7233925
+Episode 4100 - Step 7323225 - Epsilon 0.16028424973746888 - Mean Reward 19477.04 - Mean Length 1786.0 - Mean Loss 0.023 - Mean Q Value -0.011 - Time Delta 1391.851 - Time 2024-04-27T13:52:50
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_732.chkpt at step 7323225
+Episode 4150 - Step 7412525 - Epsilon 0.15674555111700297 - Mean Reward 18630.58 - Mean Length 1786.0 - Mean Loss 0.021 - Mean Q Value -0.006 - Time Delta 1395.766 - Time 2024-04-27T14:16:06
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_741.chkpt at step 7412525
+Episode 4200 - Step 7501825 - Epsilon 0.15328497862525872 - Mean Reward 17882.99 - Mean Length 1786.0 - Mean Loss 0.02 - Mean Q Value -0.003 - Time Delta 1404.901 - Time 2024-04-27T14:39:31
+BoxingNet saved to checkpoints\2024-04-26T09-01-51\boxing_net_750.chkpt at step 7501825
