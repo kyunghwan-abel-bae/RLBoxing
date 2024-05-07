@@ -53,7 +53,7 @@ for e in range(episodes):
 
         q, loss = agent.learn()
 
-        logger.log_step(reward, loss, q)
+        logger.log_step(total_reward, loss, q)
 
         state = next_state
 

@@ -28,7 +28,7 @@ env.reset()
 save_dir = Path("checkpoints") / datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')
 save_dir.mkdir(parents=True)
 
-checkpoint = Path('checkpoints/2024-04-25T09-04-38/boxing_net_1.chkpt')
+checkpoint = Path('checkpoints/target/boxing_net_285.chkpt')
 
 agent = Agent(state_dim=(4, 84, 84), action_dim=env.action_space.n, save_dir=save_dir, checkpoint=checkpoint)
 
