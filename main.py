@@ -30,16 +30,16 @@ env.reset()
 save_dir = Path("checkpoints") / datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')
 save_dir.mkdir(parents=True)
 
-checkpoint = None # Path('checkpoints/2020-10-21T18-25-27/mario.chkpt')
+checkpoint = None  # Path('checkpoints/2020-10-21T18-25-27/mario.chkpt')
 
 agent = Agent(state_dim=(4, 84, 84), action_dim=env.action_space.n, save_dir=save_dir, checkpoint=checkpoint)
 
 logger = MetricLogger(save_dir)
 
-episodes = 40000
-total_reward = 0
+episodes = 5000
 for e in range(episodes):
     state = env.reset()
+    total_reward = 0
 
     while True:
         action = agent.act(state)
@@ -49,7 +49,6 @@ for e in range(episodes):
         total_reward += reward if reward > 0 else 0
 
         agent.cache(state, next_state, action, reward, done)
-        # print(f"reward : {total_reward}")
 
         q, loss = agent.learn()
 
@@ -57,12 +56,13 @@ for e in range(episodes):
 
         state = next_state
 
-        if done or (total_reward > 199):
+        if done or (total_reward > 99):
             break
 
     logger.log_episode()
 
-    if e % 50 == 0:
+    if total_reward > 99:
+        print("KNOCK OUT")
         logger.record(
             episode=e,
             epsilon=agent.exploration_rate,
@@ -70,3 +70,15 @@ for e in range(episodes):
         )
 
         agent.save()
+        break
+
+    if e % 50 == 0:
+        print(f"total reward : {total_reward}")
+        logger.record(
+            episode=e,
+            epsilon=agent.exploration_rate,
+            step=agent.curr_step
+        )
+
+        agent.save()
+

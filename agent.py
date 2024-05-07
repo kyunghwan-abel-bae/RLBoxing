@@ -5,23 +5,43 @@ from neural import BoxingNet
 from collections import deque
 
 
+class TensorDeque(deque):
+    def __init__(self, maxlen=None):
+        super().__init__(maxlen=maxlen)
+
+    def append(self, tensor):
+        # 오래된 텐서가 제거될 때 메모리에서 해제하기 위해
+        # 제거되는 텐서를 참조하는 변수를 None으로 설정하여
+        # 메모리 해제를 유도함
+        if len(self) == self.maxlen:
+            state, next_state, action, reward, done = self.popleft()
+            del state
+            del next_state
+            del action
+            del reward
+            del done
+
+        super().append(tensor)
+
+
 class Agent:
     def __init__(self, state_dim, action_dim, save_dir, checkpoint=None):
         self.state_dim = state_dim
         self.action_dim = action_dim
-        self.memory = deque(maxlen=100000)
-        self.batch_size = 32
+        self.memory = TensorDeque(maxlen=10000)
+        self.batch_size = 15
 
         self.exploration_rate = 1
         self.exploration_rate_decay = 0.99999975
+        # self.exploration_rate_decay = 0.9999975
         self.exploration_rate_min = 0.1
         self.gamma = 0.9
 
         self.curr_step = 0
         # self.burnin = 1e5  # min. experiences before training
-        self.burnin = 1e4  # min. experiences before training
+        self.burnin = 1e3  # min. experiences before training
         self.learn_every = 3  # no. of experiences between updates to Q_online
-        self.sync_every = 1e4  # no. of experiences between Q_target & Q_online sync
+        self.sync_every = 1e3  # no. of experiences between Q_target & Q_online sync
 
         # self.save_every = 5e5  # no. of experiences between saving Boxing Net
         self.save_every = 10000  # no. of experiences between saving Boxing Net

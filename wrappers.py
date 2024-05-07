@@ -50,7 +50,7 @@ class AdapterGrayScaleObservation(gym.Wrapper):
         super().__init__(env)
 
     def step(self, action):
-        obs, reward, done, _, info = self.env.step(action)
+        obs, reward, done, truncated, info = self.env.step(action)
         return obs, reward, done, info
 
     def reset(self, **kwargs):
