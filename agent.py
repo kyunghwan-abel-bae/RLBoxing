@@ -8,59 +8,36 @@ from tensordict import TensorDict
 from torchrl.data import TensorDictReplayBuffer, LazyMemmapStorage
 
 
-class TensorDeque(deque):
-    def __init__(self, maxlen=None):
-        super().__init__(maxlen=maxlen)
-
-    def append(self, tensor):
-        # 오래된 텐서가 제거될 때 메모리에서 해제하기 위해
-        # 제거되는 텐서를 참조하는 변수를 None으로 설정하여
-        # 메모리 해제를 유도함
-        if len(self) == self.maxlen:
-            state, next_state, action, reward, done = self.popleft()
-            del state
-            del next_state
-            del action
-            del reward
-            del done
-
-        super().append(tensor)
-
-
 class Agent:
     def __init__(self, state_dim, action_dim, save_dir, checkpoint=None):
         self.state_dim = state_dim
         self.action_dim = action_dim
-        # self.memory = TensorDeque(maxlen=10000)
-        self.memory = TensorDictReplayBuffer(storage=LazyMemmapStorage(100000, device=torch.device("cpu")))
-        self.batch_size = 32
-
-        self.exploration_rate = 1
-        self.exploration_rate_decay = 0.99999975
-        # self.exploration_rate_decay = 0.9999975
-        self.exploration_rate_min = 0.1
-        self.gamma = 0.9
-
-        self.curr_step = 0
-        # self.burnin = 1e5  # min. experiences before training
-        self.burnin = 1e4  # min. experiences before training
-        self.learn_every = 3  # no. of experiences between updates to Q_online
-        self.sync_every = 1e3  # no. of experiences between Q_target & Q_online sync
-
-        # self.save_every = 5e5  # no. of experiences between saving Boxing Net
-        self.save_every = 10000  # no. of experiences between saving Boxing Net
         self.save_dir = save_dir
 
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
+        # Mario's DNN to predict the most optimal action - we implement this in the Learn section
         self.net = BoxingNet(self.state_dim, self.action_dim).float()
         self.net = self.net.to(device=self.device)
 
-        if checkpoint:
-            self.load(checkpoint)
+        self.exploration_rate = 1
+        self.exploration_rate_decay = 0.99999975
+        self.exploration_rate_min = 0.1
+        self.curr_step = 0
+
+        self.save_every = 5e5  # no. of experiences between saving Mario Net
+
+        self.memory = TensorDictReplayBuffer(storage=LazyMemmapStorage(40000, device=torch.device("cpu")))
+        self.batch_size = 32
+
+        self.gamma = 0.9
 
         self.optimizer = torch.optim.Adam(self.net.parameters(), lr=0.00025)
         self.loss_fn = torch.nn.SmoothL1Loss()
+
+        self.burnin = 1e4  # min. experiences before training
+        self.learn_every = 3  # no. of experiences between updates to Q_online
+        self.sync_every = 1e4  # no. of experiences between Q_target & Q_online sync
 
     def act(self, state):
         """
@@ -78,7 +55,7 @@ class Agent:
         # EXPLOIT
         else:
             state = state[0].__array__() if isinstance(state, tuple) else state.__array__()
-            state = torch.tensor(state, device=self.device).unsqueeze(0)
+            state = torch.tensor(state, device=self.device, dtype=torch.float32).unsqueeze(0)
             action_values = self.net(state, model="online")
             action_idx = torch.argmax(action_values, axis=1).item()
 
@@ -106,8 +83,8 @@ class Agent:
         state = first_if_tuple(state).__array__()
         next_state = first_if_tuple(next_state).__array__()
 
-        state = torch.tensor(state, dtype=torch.float)
-        next_state = torch.tensor(next_state, dtype=torch.float)
+        state = torch.tensor(state, dtype=torch.float32)
+        next_state = torch.tensor(next_state, dtype=torch.float32)
         action = torch.tensor([action], dtype=torch.long)
         reward = torch.tensor([reward], dtype=torch.double)
         done = torch.tensor([done], dtype=torch.bool)
@@ -124,25 +101,26 @@ class Agent:
         return state, next_state, action.squeeze(), reward.squeeze(), done.squeeze()
 
     def td_estimate(self, state, action):
-        current_Q = self.net(state, model='online')[np.arange(0, self.batch_size), action] # Q_online(s,a)
+        current_Q = self.net(state, model="online")[
+            np.arange(0, self.batch_size), action
+        ]  # Q_online(s,a)
         return current_Q
-
 
     @torch.no_grad()
     def td_target(self, reward, next_state, done):
-        next_state_Q = self.net(next_state, model='online')
+        next_state_Q = self.net(next_state, model="online")
         best_action = torch.argmax(next_state_Q, axis=1)
-        next_Q = self.net(next_state, model='target')[np.arange(0, self.batch_size), best_action]
+        next_Q = self.net(next_state, model="target")[
+            np.arange(0, self.batch_size), best_action
+        ]
         return (reward + (1 - done.float()) * self.gamma * next_Q).float()
 
-
-    def update_Q_online(self, td_estimate, td_target) :
+    def update_Q_online(self, td_estimate, td_target):
         loss = self.loss_fn(td_estimate, td_target)
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
         return loss.item()
-
 
     def sync_Q_target(self):
         self.net.target.load_state_dict(self.net.online.state_dict())

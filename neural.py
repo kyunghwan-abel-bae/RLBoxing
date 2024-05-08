@@ -26,10 +26,6 @@ class BoxingNet(nn.Module):
             p.requires_grad = False
 
     def forward(self, input, model):
-        if input.dtype != torch.float32 or input.dtype != torch.float64:
-            print(input)
-            print(input.shape)
-
         if model == "online":
             return self.online(input)
         elif model == "target":
