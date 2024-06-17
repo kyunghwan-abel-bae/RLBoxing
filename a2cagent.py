@@ -114,8 +114,8 @@ class A2CAgent:
         return actor_loss.item(), critic_loss.item()
 
     def save_model(self):
-        date_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-        self.save_path = f"./saved_a2c/{date_time}"
+        # date_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+        # self.save_path = f"./saved_a2c/{date_time}"
 
         print(f"... Save Model to {self.save_path}")
         torch.save({

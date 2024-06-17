@@ -30,7 +30,6 @@ save_dir.mkdir(parents=True)
 checkpoint = None  # Path('checkpoints/2020-10-21T18-25-27/mario.chkpt')
 
 agent = A2CAgent(state_dim=(4, 84, 84), action_dim=env.action_space.n, checkpoint=checkpoint)
-actor_losses, critic_losses, scores = [], [], []
 
 logger = MetricLogger(save_dir)
 
@@ -39,7 +38,7 @@ for e in range(episodes):
     state = env.reset()
     total_reward = 0
 
-    actor_loss, critic_loss = 0
+    actor_losses, critic_losses, scores = [], [], []
 
     while True:
         action = agent.act(state)
@@ -52,11 +51,13 @@ for e in range(episodes):
         # print("point1")
         total_reward += reward if reward > 0 else 0
 
-        q, loss = agent.learn(state, action, reward, next_state, done)
+        actor_loss, critic_loss = agent.learn(state, action, reward, next_state, done)
+        actor_losses.append(actor_loss)
+        critic_losses.append(critic_loss)
+
+
         # print("point2")
         # quit()
-
-        logger.log_step(total_reward, loss, q)
 
         state = next_state
 
@@ -65,25 +66,21 @@ for e in range(episodes):
         if done or (total_reward > 99):
             break
 
-    logger.log_episode()
+    mean_actor_losses = np.mean(actor_losses)
+    mean_critic_losses = np.mean(critic_losses)
+    print(f"[episode {e}] total_reward : {total_reward}, actor_losses : {mean_actor_losses}, critic_losses : {mean_critic_losses}")
 
     if total_reward > 99:
         print("KNOCK OUT")
-
-        #     def write_summary(self, score, actor_loss, critic_loss, step):
-        agent.write_summary(total_reward)
+        agent.write_summary(total_reward, mean_actor_losses, mean_critic_losses, e)
 
         agent.save_model()
-
         break
 
     if e % 50 == 0:
         print(f"total reward : {total_reward}")
-        logger.record(
-            episode=e,
-            epsilon=agent.exploration_rate,
-            step=agent.curr_step
-        )
 
-        agent.save()
+        agent.write_summary(total_reward, actor_loss, critic_loss, e)
+        agent.save_model()
+
 
