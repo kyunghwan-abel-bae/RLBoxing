@@ -7,7 +7,7 @@ import gymnasium as gym
 from gym.spaces import Box
 from gym.wrappers import FrameStack, GrayScaleObservation, TransformObservation
 
-from agent import Agent
+from a2cagent import A2CAgent
 from metrics import MetricLogger
 from wrappers import ResizeObservation, AdapterGrayScaleObservation
 
@@ -32,7 +32,13 @@ save_dir.mkdir(parents=True)
 
 checkpoint = None  # Path('checkpoints/2020-10-21T18-25-27/mario.chkpt')
 
-agent = Agent(state_dim=(4, 84, 84), action_dim=env.action_space.n, save_dir=save_dir, checkpoint=checkpoint)
+print("there")
+
+agent = A2CAgent(state_dim=(4, 84, 84), action_dim=env.action_space.n, checkpoint=checkpoint)
+actor_losses, critic_losses, scores = [], [], []
+
+print("Here")
+quit()
 
 logger = MetricLogger(save_dir)
 
@@ -43,12 +49,12 @@ for e in range(episodes):
 
     while True:
         action = agent.act(state)
+        print(f"action : {action}")
+        quit()
 
         next_state, reward, done, info = env.step(action)
 
         total_reward += reward if reward > 0 else 0
-
-        agent.cache(state, next_state, action, reward, done)
 
         q, loss = agent.learn()
 
