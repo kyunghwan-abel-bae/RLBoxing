@@ -69,7 +69,7 @@ class A2CAgent:
     def act(self, state, training=True):
         self.model.train(training)
 
-        pi, _ = self.model(torch.FloatTensor(state))
+        pi, _ = self.model(torch.FloatTensor(state).to(self.device))
         action = torch.multinomial(pi, num_samples=1).cpu().numpy()
         return action
 

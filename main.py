@@ -32,13 +32,8 @@ save_dir.mkdir(parents=True)
 
 checkpoint = None  # Path('checkpoints/2020-10-21T18-25-27/mario.chkpt')
 
-print("there")
-
 agent = A2CAgent(state_dim=(4, 84, 84), action_dim=env.action_space.n, checkpoint=checkpoint)
 actor_losses, critic_losses, scores = [], [], []
-
-print("Here")
-quit()
 
 logger = MetricLogger(save_dir)
 
@@ -48,6 +43,7 @@ for e in range(episodes):
     total_reward = 0
 
     while True:
+        print(f"state : {state.shape}")
         action = agent.act(state)
         print(f"action : {action}")
         quit()
