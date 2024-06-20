@@ -43,25 +43,16 @@ for e in range(episodes):
     while True:
         action = agent.act(state)
 
-        # print(f"state : {state}")
-
         next_state, reward, done, info = env.step(action)
-        # next_state = np.array(next_state)
-        # print(f"next_state : {next_state}, reward : {reward}, done : {done}")
-        # print("point1")
+
         total_reward += reward if reward > 0 else 0
 
         actor_loss, critic_loss = agent.learn(state, action, reward, next_state, done)
+
         actor_losses.append(actor_loss)
         critic_losses.append(critic_loss)
 
-
-        # print("point2")
-        # quit()
-
         state = next_state
-
-        # print("point5")
 
         if done or (total_reward > 99):
             break
