@@ -2,11 +2,13 @@ import datetime
 
 import torch.cuda
 import torch.nn.functional as F
+import torch.optim as optim
 
 from torch import nn
 from torch.utils.tensorboard import SummaryWriter
 
 from einops.layers.torch import Rearrange
+
 
 
 class A2CModel(nn.Module):
@@ -63,14 +65,32 @@ class A2CAgent:
             self.model = self.model.to(device='cuda')
             self.device = "cuda"
 
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.00025)
+        # self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.00025)
+        # self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.00005)
+        init_lr = 0.1
+        min_lr = 25e-4
+
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=init_lr)
+
+        lambda_lr = lambda epoch: max(min_lr, init_lr*(0.99 ** epoch))
+        self.scheduler = optim.lr_scheduler.LambdaLR(self.optimizer, lr_lambda=lambda_lr)
 
         self.writer = SummaryWriter(self.save_path)
+
+        # for TESt
+        self.pi_counter = 0
 
     def act(self, state, training=True):
         self.model.train(training)
 
         pi, _ = self.model(torch.FloatTensor(state).to(self.device))
+
+        self.pi_counter += 1
+        if self.pi_counter % 1000 == 0:
+            print(f"pi : {pi}")
+            self.pi_counter = 0
+
+
         action = torch.multinomial(pi, num_samples=1).cpu().numpy()[0]
         return action
 
@@ -98,6 +118,8 @@ class A2CAgent:
         self.optimizer.zero_grad()
         total_loss.backward()
         self.optimizer.step()
+
+
 
         return actor_loss.item(), critic_loss.item()
 

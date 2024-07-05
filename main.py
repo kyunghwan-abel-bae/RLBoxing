@@ -59,7 +59,9 @@ for e in range(episodes):
 
     mean_actor_losses = np.mean(actor_losses)
     mean_critic_losses = np.mean(critic_losses)
-    print(f"[episode {e}] total_reward : {total_reward}, actor_losses : {mean_actor_losses}, critic_losses : {mean_critic_losses}")
+    print(f"[episode {e}] total_reward : {total_reward}, actor_losses : {mean_actor_losses}, critic_losses : {mean_critic_losses}, lr : {agent.optimizer.param_groups[0]['lr']}")
+
+    agent.scheduler.step()
 
     if total_reward > 99:
         print("KNOCK OUT")
