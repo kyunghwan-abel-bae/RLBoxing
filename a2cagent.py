@@ -54,7 +54,7 @@ class A2CAgent:
         self.discount_factor = 0.9
         date_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         self.save_path = f"./saved_a2c/{date_time}"
-        self.load_path = f"./saved_a2c/~~"
+        self.load_path = f"./saved_a2c/20240705114408/ckpt"
         ##
 
         self.use_cuda = torch.cuda.is_available()
@@ -65,12 +65,21 @@ class A2CAgent:
             self.model = self.model.to(device='cuda')
             self.device = "cuda"
 
-        # self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.00025)
-        # self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.00005)
         init_lr = 0.1
         min_lr = 25e-4
 
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=init_lr)
+
+        self.data_load = None
+
+        # LOAD MODEL
+        if checkpoint:
+            self.data_load = torch.load(self.load_path, map_location=('cuda' if self.use_cuda else 'cpu'))
+
+            init_lr = self.data_load.get("lr")
+
+            self.model.load_state_dict(self.data_load.get('network'))
+            self.optimizer.load_state_dict(self.data_load.get('optimizer'))
 
         lambda_lr = lambda epoch: max(min_lr, init_lr*(0.99 ** epoch))
         self.scheduler = optim.lr_scheduler.LambdaLR(self.optimizer, lr_lambda=lambda_lr)
@@ -89,7 +98,6 @@ class A2CAgent:
         if self.pi_counter % 500 == 0:
             print(f"pi : {pi}")
             self.pi_counter = 0
-
 
         action = torch.multinomial(pi, num_samples=1).cpu().numpy()[0]
         return action
@@ -130,14 +138,14 @@ class A2CAgent:
             "lr": float(self.optimizer.param_groups[0]['lr'])
         }, self.save_path+'/ckpt')
 
+    # def load_model(self, load_path):
+    #     print("implementing")
+    #     if not load_path.exists():
+    #         raise ValueError(f"{load_path} does not exist")
+
     def write_summary(self, score, actor_loss, critic_loss, step):
         self.writer.add_scalar("run/score", score, step)
         self.writer.add_scalar("model/actor_loss", actor_loss, step)
         self.writer.add_scalar("model/critic_loss", critic_loss, step)
-
-    def load_model(self, load_path):
-        print("implementing")
-        if not load_path.exists():
-            raise ValueError(f"{load_path} does not exist")
 
 

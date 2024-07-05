@@ -3,6 +3,7 @@ from pathlib import Path
 
 import gymnasium as gym
 import numpy as np
+import torch
 from gym.spaces import Box
 from gym.wrappers import FrameStack, GrayScaleObservation, TransformObservation
 
@@ -27,14 +28,19 @@ env.reset()
 save_dir = Path("checkpoints") / datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')
 save_dir.mkdir(parents=True)
 
+# checkpoint = None  # Path('checkpoints/2020-10-21T18-25-27/mario.chkpt')
 checkpoint = None  # Path('checkpoints/2020-10-21T18-25-27/mario.chkpt')
 
 agent = A2CAgent(state_dim=(4, 84, 84), action_dim=env.action_space.n, checkpoint=checkpoint)
 
 logger = MetricLogger(save_dir)
 
+episodes_start = 0
+if checkpoint:
+    episodes_start = agent.data_load.get("episode") + 1
+
 episodes = 5000
-for e in range(episodes):
+for e in range(episodes_start, episodes):
     state = env.reset()
     total_reward = 0
 
