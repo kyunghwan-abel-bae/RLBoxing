@@ -67,13 +67,13 @@ for e in range(episodes):
         print("KNOCK OUT")
         agent.write_summary(total_reward, mean_actor_losses, mean_critic_losses, e)
 
-        agent.save_model()
+        agent.save_model(e)
         break
 
     if e % 50 == 0:
         print(f"total reward : {total_reward}")
 
         agent.write_summary(total_reward, actor_loss, critic_loss, e)
-        agent.save_model()
+        agent.save_model(e)
 
 

@@ -77,7 +77,7 @@ class A2CAgent:
 
         self.writer = SummaryWriter(self.save_path)
 
-        # for TESt
+        # for Test
         self.pi_counter = 0
 
     def act(self, state, training=True):
@@ -86,7 +86,7 @@ class A2CAgent:
         pi, _ = self.model(torch.FloatTensor(state).to(self.device))
 
         self.pi_counter += 1
-        if self.pi_counter % 1000 == 0:
+        if self.pi_counter % 500 == 0:
             print(f"pi : {pi}")
             self.pi_counter = 0
 
@@ -119,18 +119,25 @@ class A2CAgent:
         total_loss.backward()
         self.optimizer.step()
 
-
-
         return actor_loss.item(), critic_loss.item()
 
-    def save_model(self):
+    def save_model(self, num_episode):
         print(f"... Save Model to {self.save_path}")
         torch.save({
+            "episode": int(num_episode),
             "network" : self.model.state_dict(),
             "optimizer" : self.optimizer.state_dict(),
+            "lr": float(self.optimizer.param_groups[0]['lr'])
         }, self.save_path+'/ckpt')
 
     def write_summary(self, score, actor_loss, critic_loss, step):
         self.writer.add_scalar("run/score", score, step)
         self.writer.add_scalar("model/actor_loss", actor_loss, step)
         self.writer.add_scalar("model/critic_loss", critic_loss, step)
+
+    def load_model(self, load_path):
+        print("implementing")
+        if not load_path.exists():
+            raise ValueError(f"{load_path} does not exist")
+
+
