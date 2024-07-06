@@ -9,7 +9,7 @@ from gym.wrappers import FrameStack, GrayScaleObservation, TransformObservation
 
 from a2cagent import A2CAgent
 from metrics import MetricLogger
-from wrappers import ResizeObservation, AdapterGrayScaleObservation
+from wrappers import ResizeObservation, AdapterGrayScaleObservation, SkipFrame
 
 env = gym.make('BoxingDeterministic-v4', render_mode="rgb_array")
 # env = gym.make('BoxingDeterministic-v4', render_mode="human")
@@ -17,7 +17,8 @@ env = gym.make('BoxingDeterministic-v4', render_mode="rgb_array")
 
 env.observation_space = Box(low=0, high=255, shape=(210, 160, 3), dtype=np.int32)
 
-env = AdapterGrayScaleObservation(env)
+# env = AdapterGrayScaleObservation(env)
+env = SkipFrame(env, skip=4)
 env = GrayScaleObservation(env, keep_dim=False)
 env = ResizeObservation(env, shape=84)
 env = TransformObservation(env, f=lambda x: x / 255.)
