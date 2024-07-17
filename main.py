@@ -11,10 +11,33 @@ from a2cagent import A2CAgent
 from metrics import MetricLogger
 from wrappers import ResizeObservation, AdapterGrayScaleObservation
 
+from gym import spaces
+
+
+class CustomActionSpaceWrapper(gym.ActionWrapper):
+    def __init__(self, env):
+        super(CustomActionSpaceWrapper, self).__init__(env)
+
+        # Define the new action space, for example restricting the actions to 0, 1, and 2
+        self.action_space = spaces.Discrete(8)
+
+        # self.env.observation_space = Box(low=0, high=255, shape=(210, 160, 3), dtype=np.int32)
+
+    def action(self, action):
+        # Map the custom action space to the original action space
+        # For example, we might map actions {0, 1, 2} to original actions {0, 1, 2}
+        # You can customize this mapping based on your needs
+        original_action = action + 10
+        return original_action
+
+
 env = gym.make('BoxingDeterministic-v4', render_mode="rgb_array")
 # env = gym.make('BoxingDeterministic-v4', render_mode="human")
 # env = gym.make('BoxingNoFrameskip-v4', render_mode="rgb_array")
 
+env = CustomActionSpaceWrapper(env)
+
+# noted by KH -- Below need to be moved to the above class
 env.observation_space = Box(low=0, high=255, shape=(210, 160, 3), dtype=np.int32)
 
 env = AdapterGrayScaleObservation(env)
