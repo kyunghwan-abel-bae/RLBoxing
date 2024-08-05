@@ -116,8 +116,6 @@ for e in range(episodes_start, episodes):
 
     agent.scheduler.step()
 
-    print(f"state : {state.shape}")
-    capture_state(state, e)
 
     if total_reward > 99:
         print("KNOCK OUT")
@@ -128,6 +126,8 @@ for e in range(episodes_start, episodes):
 
     if e % 50 == 0:
         print(f"total reward : {total_reward}")
+
+        capture_state(state, e)
 
         agent.write_summary(total_reward, actor_loss, critic_loss, e)
         agent.save_model(e)
