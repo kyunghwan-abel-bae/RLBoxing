@@ -52,7 +52,7 @@ env = gym.make('BoxingDeterministic-v4', render_mode="rgb_array")
 # env = gym.make('BoxingDeterministic-v4', render_mode="human")
 # env = gym.make('BoxingNoFrameskip-v4', render_mode="rgb_array")
 
-num_frames = 2
+num_frames = 3
 
 # env = CustomActionSpaceWrapper(env)
 
@@ -85,6 +85,7 @@ if checkpoint:
     episodes_start = agent.data_load.get("episode") + 1
 
 episodes = 5000
+best_score = 0
 for e in range(episodes_start, episodes):
     state = env.reset()
     total_reward = 0
@@ -108,9 +109,10 @@ for e in range(episodes_start, episodes):
         if done or (total_reward > 99):
             break
 
+    best_score = total_reward if best_score < total_reward else best_score
     mean_actor_losses = np.mean(actor_losses)
     mean_critic_losses = np.mean(critic_losses)
-    print(f"[episode {e}] total_reward : {total_reward}, actor_losses : {mean_actor_losses}, critic_losses : {mean_critic_losses}, lr : {agent.optimizer.param_groups[0]['lr']}")
+    print(f"[episode {e}] best_score : {best_score}, total_reward : {total_reward}, actor_losses : {mean_actor_losses}, critic_losses : {mean_critic_losses}, lr : {agent.optimizer.param_groups[0]['lr']}")
 
     agent.scheduler.step()
 
