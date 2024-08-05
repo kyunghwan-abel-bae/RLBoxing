@@ -2,6 +2,7 @@ import datetime
 from pathlib import Path
 
 import gymnasium as gym
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from gym.spaces import Box
@@ -28,18 +29,44 @@ class CustomActionSpaceWrapper(gym.ActionWrapper):
         return original_action
 
 
+def capture_state(input, ep):
+    count = input.shape[0]
+    fig, ax = plt.subplots(1, count, figsize=(count * 2, 2))
+    axes = ax.flatten()
+
+    for i in range(count):
+        axes[i].imshow(input[i])
+        axes[i].axis('off')
+
+    date_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+
+    filename = f"{date_time}_{ep}_{count}stacks"
+
+    plt.savefig(filename, bbox_inches='tight', pad_inches=0.1)
+    plt.close()
+
+
+
+
 env = gym.make('BoxingDeterministic-v4', render_mode="rgb_array")
 # env = gym.make('BoxingDeterministic-v4', render_mode="human")
 # env = gym.make('BoxingNoFrameskip-v4', render_mode="rgb_array")
 
+num_frames = 2
+
 # env = CustomActionSpaceWrapper(env)
 
-# env = AdapterGrayScaleObservation(env)
-env = SkipFrame(env, skip=4)
+env = AdapterGrayScaleObservation(env)
+# env = SkipFrame(env, skip=2)
+print(f"1 env state : {env.observation_space}")
 env = GrayScaleObservation(env, keep_dim=False)
+print(f"2 env state : {env.observation_space}")
 env = ResizeObservation(env, shape=84)
+print(f"3 env state : {env.observation_space}")
 env = TransformObservation(env, f=lambda x: x / 255.)
-env = FrameStack(env, num_stack=4)
+print(f"4 env state : {env.observation_space}")
+env = FrameStack(env, num_stack=num_frames)
+print(f"5 env state : {env.observation_space}")
 
 env.reset()
 
@@ -49,7 +76,7 @@ save_dir.mkdir(parents=True)
 # checkpoint = None  # Path('checkpoints/2020-10-21T18-25-27/mario.chkpt')
 checkpoint = None  # Path('checkpoints/2020-10-21T18-25-27/mario.chkpt')
 
-agent = A2CAgent(state_dim=(4, 84, 84), action_dim=env.action_space.n, checkpoint=checkpoint)
+agent = A2CAgent(state_dim=(num_frames, 84, 84), action_dim=env.action_space.n, checkpoint=checkpoint)
 
 logger = MetricLogger(save_dir)
 
@@ -86,6 +113,9 @@ for e in range(episodes_start, episodes):
     print(f"[episode {e}] total_reward : {total_reward}, actor_losses : {mean_actor_losses}, critic_losses : {mean_critic_losses}, lr : {agent.optimizer.param_groups[0]['lr']}")
 
     agent.scheduler.step()
+
+    print(f"state : {state.shape}")
+    capture_state(state, e)
 
     if total_reward > 99:
         print("KNOCK OUT")
