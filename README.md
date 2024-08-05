@@ -7,4 +7,4 @@
 
 2024.04.29
 - dev-win is created
-- Small replay memory may occur bad learning. This issue can be a key to solve the problem.
+- Small replay memory may occur bad learning. This issue can be a key to solve the problem.[main.py](main.py)

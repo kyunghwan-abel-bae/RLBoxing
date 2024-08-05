@@ -18,8 +18,10 @@ class CustomActionSpaceWrapper(gym.ActionWrapper):
     def __init__(self, env):
         super(CustomActionSpaceWrapper, self).__init__(env)
 
+
+
         # Define the new action space, for example restricting the actions to 0, 1, and 2
-        self.action_space = spaces.Discrete(8)
+        self.action_space = spaces.Discrete(6)
 
         # self.env.observation_space = Box(low=0, high=255, shape=(210, 160, 3), dtype=np.int32)
 
@@ -27,8 +29,10 @@ class CustomActionSpaceWrapper(gym.ActionWrapper):
         # Map the custom action space to the original action space
         # For example, we might map actions {0, 1, 2} to original actions {0, 1, 2}
         # You can customize this mapping based on your needs
-        original_action = action + 10
-        return original_action
+
+        # original_action = action + 10
+        # return original_action
+        return action
 
 
 env = gym.make('BoxingDeterministic-v4', render_mode="rgb_array")
@@ -42,6 +46,7 @@ env.observation_space = Box(low=0, high=255, shape=(210, 160, 3), dtype=np.int32
 
 # env = AdapterGrayScaleObservation(env)
 env = SkipFrame(env, skip=4)
+# env = SkipFrame(env, skip=2)
 env = GrayScaleObservation(env, keep_dim=False)
 env = ResizeObservation(env, shape=84)
 env = TransformObservation(env, f=lambda x: x / 255.)
