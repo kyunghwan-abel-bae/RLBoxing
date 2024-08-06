@@ -86,6 +86,7 @@ if checkpoint:
 
 episodes = 5000
 best_score = 0
+best_e = 0
 for e in range(episodes_start, episodes):
     state = env.reset()
     total_reward = 0
@@ -109,10 +110,13 @@ for e in range(episodes_start, episodes):
         if done or (total_reward > 99):
             break
 
-    best_score = total_reward if best_score < total_reward else best_score
+    if best_score < total_reward:
+        best_score = total_reward
+        best_e = e
+
     mean_actor_losses = np.mean(actor_losses)
     mean_critic_losses = np.mean(critic_losses)
-    print(f"[episode {e}] best_score : {best_score}, total_reward : {total_reward}, actor_losses : {mean_actor_losses}, critic_losses : {mean_critic_losses}, lr : {agent.optimizer.param_groups[0]['lr']}")
+    print(f"[episode {e}] best_score at {best_e} : {best_score}, total_reward : {total_reward}, actor_losses : {mean_actor_losses}, critic_losses : {mean_critic_losses}, lr : {agent.optimizer.param_groups[0]['lr']}")
 
     agent.scheduler.step()
 
