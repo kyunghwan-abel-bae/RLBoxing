@@ -65,8 +65,8 @@ class A2CAgent:
             self.model = self.model.to(device='cuda')
             self.device = "cuda"
 
-        init_lr = 0.01
-        min_lr = 25e-4
+        init_lr = 0.001
+        min_lr = 25e-5
 
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=init_lr)
 
@@ -83,7 +83,7 @@ class A2CAgent:
 
         # lambda_lr = lambda epoch: max(min_lr, init_lr*(0.995 ** epoch))
         # self.scheduler = optim.lr_scheduler.LambdaLR(self.optimizer, lr_lambda=lambda_lr)
-        self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=50, eta_min=min_lr)
+        self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=100, eta_min=min_lr)
 
         self.writer = SummaryWriter(self.save_path)
 

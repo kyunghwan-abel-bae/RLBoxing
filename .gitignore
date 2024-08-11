@@ -1,3 +1,4 @@
 checkpoints/*
 saved_a2c/*
 *.png
+*.txt

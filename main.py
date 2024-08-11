@@ -45,14 +45,17 @@ def capture_state(input, ep):
     plt.savefig(filename, bbox_inches='tight', pad_inches=0.1)
     plt.close()
 
-
+str_temp = [""]
+def bprint(msg, str_temp):
+    print(msg)
+    str_temp[0] = str_temp[0] + msg + "\n"
 
 
 env = gym.make('BoxingDeterministic-v4', render_mode="rgb_array")
 # env = gym.make('BoxingDeterministic-v4', render_mode="human")
 # env = gym.make('BoxingNoFrameskip-v4', render_mode="rgb_array")
 
-num_frames = 3
+num_frames = 2
 
 # env = CustomActionSpaceWrapper(env)
 
@@ -116,24 +119,34 @@ for e in range(episodes_start, episodes):
 
     mean_actor_losses = np.mean(actor_losses)
     mean_critic_losses = np.mean(critic_losses)
-    print(f"[episode {e}] best_score at {best_e} : {best_score}, total_reward : {total_reward}, actor_losses : {mean_actor_losses}, critic_losses : {mean_critic_losses}, lr : {agent.optimizer.param_groups[0]['lr']}")
+    bprint(f"[episode {e}] best_score at {best_e} : {best_score}, total_reward : {total_reward}, actor_losses : {mean_actor_losses}, critic_losses : {mean_critic_losses}, lr : {agent.optimizer.param_groups[0]['lr']}", str_temp)
 
     agent.scheduler.step()
 
-
     if total_reward > 99:
-        print("KNOCK OUT")
+        bprint("KNOCK OUT", str_temp)
         agent.write_summary(total_reward, mean_actor_losses, mean_critic_losses, e)
 
         agent.save_model(e)
         break
 
+    # if e % 3 == 0:
     if e % 50 == 0:
-        print(f"total reward : {total_reward}")
+        print(f"total reward : {total_reward}")#, str_temp)
 
         capture_state(state, e)
 
         agent.write_summary(total_reward, actor_loss, critic_loss, e)
         agent.save_model(e)
 
+        # date_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+        # filename = f"A2C_{date_time}_{e}.txt"
+        filename = "A2C_OUTPUT.txt"
 
+        with open(filename, "a") as file:
+            # 파일에 문자열 쓰기
+            file.write(str_temp[0])
+
+    if e % 500 == 0:
+        print(f"flush_str_temp : {str_temp}")
+        str_temp[0] = ""
