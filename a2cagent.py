@@ -46,7 +46,7 @@ class A2CModel(nn.Module):
 
 
 class A2CAgent:
-    def __init__(self, state_dim, action_dim, checkpoint=None):
+    def __init__(self, state_dim, action_dim, checkpoint=None, func_print=None):
         self.state_dim = state_dim
         self.action_dim = action_dim
 
@@ -65,10 +65,12 @@ class A2CAgent:
             self.model = self.model.to(device='cuda')
             self.device = "cuda"
 
-        init_lr = 0.001
-        min_lr = 25e-5
+        self.init_lr = 0.001
+        self.min_lr = 25e-5
 
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=init_lr)
+        self.func_print = func_print
+
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.init_lr)
 
         self.data_load = None
 
@@ -76,14 +78,14 @@ class A2CAgent:
         if checkpoint:
             self.data_load = torch.load(self.load_path, map_location=('cuda' if self.use_cuda else 'cpu'))
 
-            init_lr = self.data_load.get("lr")
+            self.init_lr = self.data_load.get("lr")
 
             self.model.load_state_dict(self.data_load.get('network'))
             self.optimizer.load_state_dict(self.data_load.get('optimizer'))
 
-        # lambda_lr = lambda epoch: max(min_lr, init_lr*(0.995 ** epoch))
+        # lambda_lr = lambda epoch: max(self.min_lr, self.init_lr*(0.995 ** epoch))
         # self.scheduler = optim.lr_scheduler.LambdaLR(self.optimizer, lr_lambda=lambda_lr)
-        self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=100, eta_min=min_lr)
+        self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=100, eta_min=self.min_lr)
 
         self.writer = SummaryWriter(self.save_path)
 
@@ -97,7 +99,7 @@ class A2CAgent:
 
         self.pi_counter += 1
         if self.pi_counter % 500 == 0:
-            print(f"pi : {pi}")
+            self.func_print(f"pi : {pi}")
             self.pi_counter = 0
 
         action = torch.multinomial(pi, num_samples=1).cpu().numpy()[0]

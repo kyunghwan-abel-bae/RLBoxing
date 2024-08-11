@@ -14,6 +14,8 @@ from wrappers import ResizeObservation, AdapterGrayScaleObservation, SkipFrame
 
 from gym import spaces
 
+from utils import *
+
 class CustomActionSpaceWrapper(gym.ActionWrapper):
     def __init__(self, env):
         super(CustomActionSpaceWrapper, self).__init__(env)
@@ -45,11 +47,6 @@ def capture_state(input, ep):
     plt.savefig(filename, bbox_inches='tight', pad_inches=0.1)
     plt.close()
 
-str_temp = [""]
-def bprint(msg, str_temp):
-    print(msg)
-    str_temp[0] = str_temp[0] + msg + "\n"
-
 
 env = gym.make('BoxingDeterministic-v4', render_mode="rgb_array")
 # env = gym.make('BoxingDeterministic-v4', render_mode="human")
@@ -79,7 +76,7 @@ save_dir.mkdir(parents=True)
 # checkpoint = None  # Path('checkpoints/2020-10-21T18-25-27/mario.chkpt')
 checkpoint = None  # Path('checkpoints/2020-10-21T18-25-27/mario.chkpt')
 
-agent = A2CAgent(state_dim=(num_frames, 84, 84), action_dim=env.action_space.n, checkpoint=checkpoint)
+agent = A2CAgent(state_dim=(num_frames, 84, 84), action_dim=env.action_space.n, checkpoint=checkpoint, func_print=bprint)
 
 logger = MetricLogger(save_dir)
 
@@ -119,12 +116,12 @@ for e in range(episodes_start, episodes):
 
     mean_actor_losses = np.mean(actor_losses)
     mean_critic_losses = np.mean(critic_losses)
-    bprint(f"[episode {e}] best_score at {best_e} : {best_score}, total_reward : {total_reward}, actor_losses : {mean_actor_losses}, critic_losses : {mean_critic_losses}, lr : {agent.optimizer.param_groups[0]['lr']}", str_temp)
+    bprint(f"[episode {e}] best_score at {best_e} : {best_score}, total_reward : {total_reward}, actor_losses : {mean_actor_losses}, critic_losses : {mean_critic_losses}, lr : {agent.optimizer.param_groups[0]['lr']}")
 
     agent.scheduler.step()
 
     if total_reward > 99:
-        bprint("KNOCK OUT", str_temp)
+        bprint("KNOCK OUT")
         agent.write_summary(total_reward, mean_actor_losses, mean_critic_losses, e)
 
         agent.save_model(e)
@@ -140,13 +137,5 @@ for e in range(episodes_start, episodes):
         agent.save_model(e)
 
         # date_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-        # filename = f"A2C_{date_time}_{e}.txt"
-        filename = "A2C_OUTPUT.txt"
-
-        with open(filename, "a") as file:
-            # 파일에 문자열 쓰기
-            file.write(str_temp[0])
-
-    if e % 500 == 0:
-        print(f"flush_str_temp : {str_temp}")
-        str_temp[0] = ""
+        filename = f"A2C_Log_[init_lr_{agent.init_lr}][min_lr_{agent.min_lr}].txt"
+        save_bprint(filename)
