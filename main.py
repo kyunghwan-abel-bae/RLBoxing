@@ -52,7 +52,7 @@ env = gym.make('BoxingDeterministic-v4', render_mode="rgb_array")
 # env = gym.make('BoxingDeterministic-v4', render_mode="human")
 # env = gym.make('BoxingNoFrameskip-v4', render_mode="rgb_array")
 
-num_frames = 2
+num_frames = 3
 
 # env = CustomActionSpaceWrapper(env)
 
@@ -84,7 +84,7 @@ episodes_start = 0
 if checkpoint:
     episodes_start = agent.data_load.get("episode") + 1
 
-episodes = 5000
+episodes = 3000
 best_score = 0
 best_e = 0
 for e in range(episodes_start, episodes):
@@ -137,5 +137,5 @@ for e in range(episodes_start, episodes):
         agent.save_model(e)
 
         # date_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-        filename = f"A2C_Log_[init_lr_{agent.init_lr}][min_lr_{agent.min_lr}].txt"
+        filename = f"A2C_Log_[{num_frames}stack][init_lr_{agent.init_lr}][min_lr_{agent.min_lr}].txt"
         save_bprint(filename)
