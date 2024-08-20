@@ -1,4 +1,5 @@
 import datetime
+import random
 
 import torch.cuda
 import torch.nn.functional as F
@@ -9,6 +10,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 from einops.layers.torch import Rearrange
 
+from collections import deque
 
 
 class A2CModel(nn.Module):
@@ -57,6 +59,11 @@ class A2CAgent:
         self.load_path = f"./saved_a2c/20240705114408/ckpt"
         ##
 
+        ## added
+        self.min_replay_memory_size = 5
+        self.replay_memory = deque(maxlen=5000)
+        ## added
+
         self.use_cuda = torch.cuda.is_available()
 
         self.model = A2CModel(self.state_dim, self.action_dim).float()
@@ -92,6 +99,9 @@ class A2CAgent:
         # for Test
         self.pi_counter = 0
 
+    def update_replay_memory(self, state, action, reward, next_state, done):
+        self.replay_memory.append((state, action, reward, next_state, done))
+
     def act(self, state, training=True):
         self.model.train(training)
 
@@ -105,7 +115,17 @@ class A2CAgent:
         action = torch.multinomial(pi, num_samples=1).cpu().numpy()[0]
         return action
 
-    def learn(self, state, action, reward, next_state, done):
+    # def learn(self, state, action, reward, next_state, done):
+    def learn(self):#, state, action, reward, next_state, done):
+        sample = random.sample(self.replay_memory, 1)
+        sample = sample[0]
+
+        state = sample[0]
+        action = sample[1]
+        reward = sample[2]
+        next_state = sample[3]
+        done = sample[4]
+
         state = torch.FloatTensor(state).cuda() if self.use_cuda else torch.FloatTensor(state)
         next_state = torch.FloatTensor(next_state).cuda() if self.use_cuda else torch.FloatTensor(next_state)
         action = torch.LongTensor([action]).cuda() if self.use_cuda else torch.LongTensor([action])
