@@ -100,7 +100,9 @@ for e in range(episodes_start, episodes):
 
         total_reward += reward if reward > 0 else 0
 
-        actor_loss, critic_loss = agent.learn(state, action, reward, next_state, done)
+        agent.update_replay_memory(state, action, reward, next_state, done)
+
+        actor_loss, critic_loss = agent.learn()#state, action, reward, next_state, done)
 
         actor_losses.append(actor_loss)
         critic_losses.append(critic_loss)
