@@ -52,7 +52,7 @@ env = gym.make('BoxingDeterministic-v4', render_mode="rgb_array")
 # env = gym.make('BoxingDeterministic-v4', render_mode="human")
 # env = gym.make('BoxingNoFrameskip-v4', render_mode="rgb_array")
 
-num_frames = 2
+num_frames = 3
 
 # env = CustomActionSpaceWrapper(env)
 
