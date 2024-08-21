@@ -125,7 +125,7 @@ class A2CAgent:
         actor_loss = -(torch.log((one_hot_action * pi).sum(1))*advantage).mean()
 
         # 엔트로피 정규화 추가
-        entropy = -(pi * torch.log(pi + 1e-10)).sum(1).mean()  # 엔트로피 계산
+        entropy = -(pi * torch.log(pi + 1e-10)).sum()  # 엔트로피 계산
         beta = 0.01  # 엔트로피 정규화 강도, 필요에 따라 조절 가능
 
         actor_loss -= beta * entropy  # 엔트로피 항을 actor_loss에 추가
