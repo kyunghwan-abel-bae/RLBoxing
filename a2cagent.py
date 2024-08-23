@@ -16,7 +16,8 @@ from collections import deque
 class A2CModel(nn.Module):
     def __init__(self, input_dim, output_dim):
         super().__init__()
-        c, h, w = input_dim
+        b, c, h, w = input_dim
+        b, a = output_dim
 
         if h != 84:
             raise ValueError(f"Expecting input height: 84, got: {h}")
@@ -25,12 +26,18 @@ class A2CModel(nn.Module):
 
         self.model_common = self.__build_cnn(c)
 
-        self.pi = nn.Linear(512, output_dim)
+        self.pi = nn.Linear(512, a)
         self.v = nn.Linear(512, 1)
 
     def forward(self, x):
         x = self.model_common(x)
 
+        # a = self.pi(x)
+        # b = self.v(x)
+        # print("a, b done")
+        # print(a)
+
+        # return F.softmax(a), b#F.softmax(self.pi(x)), self.v(x)
         return F.softmax(self.pi(x)), self.v(x)
 
     def __build_cnn(self, c):
@@ -41,7 +48,7 @@ class A2CModel(nn.Module):
             nn.ReLU(),
             nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=1),
             nn.ReLU(),
-            Rearrange('c h w -> (c h w)'),
+            Rearrange('b c h w -> b (c h w)'),
             nn.Linear(3136, 512),
             nn.ReLU()
         )
@@ -60,13 +67,17 @@ class A2CAgent:
         ##
 
         ## added
-        self.min_replay_memory_size = 5
-        self.replay_memory = deque(maxlen=5000)
+        self.min_replay_memory_size = 1000
+        self.replay_memory = deque(maxlen=10000)
+        self.batch_size = 16
         ## added
 
         self.use_cuda = torch.cuda.is_available()
 
-        self.model = A2CModel(self.state_dim, self.action_dim).float()
+        model_state_dim = (self.batch_size,) + self.state_dim
+        model_action_dim = (self.batch_size, self.action_dim)
+        self.model = A2CModel(model_state_dim, model_action_dim).float()
+
         self.device = "cpu"
         if self.use_cuda:
             self.model = self.model.to(device='cuda')
@@ -100,6 +111,12 @@ class A2CAgent:
         self.pi_counter = 0
 
     def update_replay_memory(self, state, action, reward, next_state, done):
+        state = torch.FloatTensor(state).cuda() if self.use_cuda else torch.FloatTensor(state)
+        next_state = torch.FloatTensor(next_state).cuda() if self.use_cuda else torch.FloatTensor(next_state)
+        action = torch.LongTensor([action]).cuda() if self.use_cuda else torch.LongTensor([action])
+        reward = torch.FloatTensor([reward]).cuda() if self.use_cuda else torch.FloatTensor([reward])
+        done = torch.BoolTensor([done]).cuda() if self.use_cuda else torch.BoolTensor([done])
+
         self.replay_memory.append((state, action, reward, next_state, done))
 
     def act(self, state, training=True):
@@ -113,36 +130,32 @@ class A2CAgent:
             self.pi_counter = 0
 
         action = torch.multinomial(pi, num_samples=1).cpu().numpy()[0]
-        return action
+        # print(f"action : {action}")
+        return action[0]
 
     # def learn(self, state, action, reward, next_state, done):
     def learn(self):#, state, action, reward, next_state, done):
-        sample = random.sample(self.replay_memory, 1)
-        sample = sample[0]
+        if len(self.replay_memory) < self.min_replay_memory_size:
+            return -1, -1
 
-        state = sample[0]
-        action = sample[1]
-        reward = sample[2]
-        next_state = sample[3]
-        done = sample[4]
+        samples = random.sample(self.replay_memory, self.batch_size)
 
-        state = torch.FloatTensor(state).cuda() if self.use_cuda else torch.FloatTensor(state)
-        next_state = torch.FloatTensor(next_state).cuda() if self.use_cuda else torch.FloatTensor(next_state)
-        action = torch.LongTensor([action]).cuda() if self.use_cuda else torch.LongTensor([action])
+        state, action, reward, next_state, done = map(torch.stack, zip(*samples))
 
         pi, value = self.model(state)
 
         with torch.no_grad():
             _, next_value = self.model(next_state)
-            target_value = reward + (1-done) * self.discount_factor * next_value
+            target_value = reward + (1-done.float()) * self.discount_factor * next_value
 
         critic_loss = F.mse_loss(value, target_value)
 
         eye = torch.eye(self.action_dim).to(self.device)
         one_hot_action = eye[action.view(-1).long()]
-
+        one_hot_action = one_hot_action.view(action.size(0), -1, self.action_dim)
         advantage = (target_value - value).detach()
-        actor_loss = -(torch.log((one_hot_action * pi).sum(1))*advantage).mean()
+
+        actor_loss = -(torch.log((one_hot_action * pi).sum(2)) * advantage).mean()
 
         total_loss = critic_loss + actor_loss
 
