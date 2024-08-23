@@ -76,6 +76,7 @@ save_dir.mkdir(parents=True)
 # checkpoint = None  # Path('checkpoints/2020-10-21T18-25-27/mario.chkpt')
 checkpoint = None  # Path('checkpoints/2020-10-21T18-25-27/mario.chkpt')
 
+# 16 : batch size
 agent = A2CAgent(state_dim=(num_frames, 84, 84), action_dim=env.action_space.n, checkpoint=checkpoint, func_print=bprint)
 
 logger = MetricLogger(save_dir)
@@ -94,7 +95,7 @@ for e in range(episodes_start, episodes):
     actor_losses, critic_losses, scores = [], [], []
 
     while True:
-        action = agent.act(state)
+        action = agent.act([state])
 
         next_state, reward, done, info = env.step(action)
 
