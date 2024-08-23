@@ -31,7 +31,12 @@ class A2CModel(nn.Module):
     def forward(self, x):
         x = self.model_common(x)
 
-        return F.softmax(self.pi(x)), self.v(x)
+        a = self.pi(x)
+        b = self.v(x)
+        print("a, b done")
+        print(a)
+
+        return F.softmax(a), b#F.softmax(self.pi(x)), self.v(x)
 
     def __build_cnn(self, c):
         return nn.Sequential(
@@ -62,6 +67,7 @@ class A2CAgent:
         ## added
         self.min_replay_memory_size = 1000
         self.replay_memory = deque(maxlen=10000)
+        self.batch_size = 16
         ## added
 
         self.use_cuda = torch.cuda.is_available()
@@ -100,6 +106,12 @@ class A2CAgent:
         self.pi_counter = 0
 
     def update_replay_memory(self, state, action, reward, next_state, done):
+        state = torch.FloatTensor(state).cuda() if self.use_cuda else torch.FloatTensor(state)
+        next_state = torch.FloatTensor(next_state).cuda() if self.use_cuda else torch.FloatTensor(next_state)
+        action = torch.LongTensor([action]).cuda() if self.use_cuda else torch.LongTensor([action])
+        reward = torch.DoubleTensor([reward]).cuda() if self.use_cuda else torch.DoubleTensor([reward])
+        done = torch.BoolTensor([done]).cuda() if self.use_cuda else torch.BoolTensor([done])
+
         self.replay_memory.append((state, action, reward, next_state, done))
 
     def act(self, state, training=True):
@@ -117,23 +129,30 @@ class A2CAgent:
 
     # def learn(self, state, action, reward, next_state, done):
     def learn(self):#, state, action, reward, next_state, done):
-        if len(self.replay_memory) < self.min_replay_memory_size:
+        if len(self.replay_memory) < 20:#self.min_replay_memory_size:
             return -1, -1
 
-        sample = random.sample(self.replay_memory, 1)
-        sample = sample[0]
+        samples = random.sample(self.replay_memory, self.batch_size)
 
-        state = sample[0]
-        action = sample[1]
-        reward = sample[2]
-        next_state = sample[3]
-        done = sample[4]
+        state, action, reward, next_state, done = map(torch.stack, zip(*samples))
 
-        state = torch.FloatTensor(state).cuda() if self.use_cuda else torch.FloatTensor(state)
-        next_state = torch.FloatTensor(next_state).cuda() if self.use_cuda else torch.FloatTensor(next_state)
-        action = torch.LongTensor([action]).cuda() if self.use_cuda else torch.LongTensor([action])
+        # sample = sample[0]
+        #
+        # state = sample[0]
+        # action = sample[1]
+        # reward = sample[2]
+        # next_state = sample[3]
+        # done = sample[4]
+
+        # state = torch.FloatTensor(state).cuda() if self.use_cuda else torch.FloatTensor(state)
+        # next_state = torch.FloatTensor(next_state).cuda() if self.use_cuda else torch.FloatTensor(next_state)
+        # action = torch.LongTensor([action]).cuda() if self.use_cuda else torch.LongTensor([action])
 
         pi, value = self.model(state)
+
+        print("test quit")
+        quit()
+        # print(f"pi.shape : {pi.shape}")
 
         with torch.no_grad():
             _, next_value = self.model(next_state)
