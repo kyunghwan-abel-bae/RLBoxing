@@ -60,8 +60,8 @@ class A2CAgent:
         ##
 
         ## added
-        self.min_replay_memory_size = 5
-        self.replay_memory = deque(maxlen=5000)
+        self.min_replay_memory_size = 1000
+        self.replay_memory = deque(maxlen=10000)
         ## added
 
         self.use_cuda = torch.cuda.is_available()
@@ -117,6 +117,9 @@ class A2CAgent:
 
     # def learn(self, state, action, reward, next_state, done):
     def learn(self):#, state, action, reward, next_state, done):
+        if len(self.replay_memory) < self.min_replay_memory_size:
+            return -1, -1
+
         sample = random.sample(self.replay_memory, 1)
         sample = sample[0]
 
