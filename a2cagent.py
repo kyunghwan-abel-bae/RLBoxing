@@ -30,23 +30,28 @@ class A2CModel(nn.Module):
         self.v = nn.Linear(512, 1)
 
     def forward(self, x):
+        # print(f"x : {x}")
         x = self.model_common(x)
+        # print(f"model_commonx : {x}")
 
-        # a = self.pi(x)
-        # b = self.v(x)
+        a = self.pi(x)
+        b = self.v(x)
         # print("a, b done")
         # print(a)
 
-        # return F.softmax(a), b#F.softmax(self.pi(x)), self.v(x)
-        return F.softmax(self.pi(x)), self.v(x)
+        return F.softmax(a), b#F.softmax(self.pi(x)), self.v(x)
+        # return F.softmax(self.pi(x)), self.v(x)
 
     def __build_cnn(self, c):
         return nn.Sequential(
             nn.Conv2d(in_channels=c, out_channels=32, kernel_size=8, stride=4),
+            nn.BatchNorm2d(32),
             nn.ReLU(),
             nn.Conv2d(in_channels=32, out_channels=64, kernel_size=4, stride=2),
+            nn.BatchNorm2d(64),
             nn.ReLU(),
             nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=1),
+            nn.BatchNorm2d(64),
             nn.ReLU(),
             Rearrange('b c h w -> b (c h w)'),
             nn.Linear(3136, 512),
@@ -67,7 +72,7 @@ class A2CAgent:
         ##
 
         ## added
-        self.min_replay_memory_size = 1000
+        self.min_replay_memory_size = 500
         self.replay_memory = deque(maxlen=10000)
         self.batch_size = 16
         ## added
@@ -83,9 +88,9 @@ class A2CAgent:
             self.model = self.model.to(device='cuda')
             self.device = "cuda"
 
-        self.init_lr = 0.001
-        self.min_lr = 25e-5
-
+        self.init_lr = 1e-6
+        self.min_lr = 1e-7
+        #
         self.func_print = func_print
 
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.init_lr)
@@ -103,7 +108,7 @@ class A2CAgent:
 
         # lambda_lr = lambda epoch: max(self.min_lr, self.init_lr*(0.995 ** epoch))
         # self.scheduler = optim.lr_scheduler.LambdaLR(self.optimizer, lr_lambda=lambda_lr)
-        self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=100, eta_min=self.min_lr)
+        self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=1000, eta_min=self.min_lr)
 
         self.writer = SummaryWriter(self.save_path)
 
@@ -113,6 +118,7 @@ class A2CAgent:
     def update_replay_memory(self, state, action, reward, next_state, done):
         state = torch.FloatTensor(state).cuda() if self.use_cuda else torch.FloatTensor(state)
         next_state = torch.FloatTensor(next_state).cuda() if self.use_cuda else torch.FloatTensor(next_state)
+        # print("action : ", action)
         action = torch.LongTensor([action]).cuda() if self.use_cuda else torch.LongTensor([action])
         reward = torch.FloatTensor([reward]).cuda() if self.use_cuda else torch.FloatTensor([reward])
         done = torch.BoolTensor([done]).cuda() if self.use_cuda else torch.BoolTensor([done])
@@ -120,6 +126,9 @@ class A2CAgent:
         self.replay_memory.append((state, action, reward, next_state, done))
 
     def act(self, state, training=True):
+        # if len(self.replay_memory) < self.min_replay_memory_size:
+        #     return random.randint(0, self.action_dim-1)
+
         self.model.train(training)
 
         pi, _ = self.model(torch.FloatTensor(state).to(self.device))
@@ -129,9 +138,18 @@ class A2CAgent:
             self.func_print(f"pi : {pi}")
             self.pi_counter = 0
 
+        # if torch.isnan(pi).any() or torch.isinf(pi).any() or (pi < 0).any():
+        #     print("Invalid values in probability tensor:", pi)
+        # print(f"pi.shape : {pi.shape}")
+        # print(f"pi : {pi}")
+
         action = torch.multinomial(pi, num_samples=1).cpu().numpy()[0]
-        # print(f"action : {action}")
-        return action[0]
+
+        # print(f"action in act : {action}")
+        action = action[0]
+
+        # print(f"action in act : {action}")
+        return action
 
     # def learn(self, state, action, reward, next_state, done):
     def learn(self):#, state, action, reward, next_state, done):
@@ -161,6 +179,9 @@ class A2CAgent:
 
         self.optimizer.zero_grad()
         total_loss.backward()
+
+        # torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
+
         self.optimizer.step()
 
         return actor_loss.item(), critic_loss.item()

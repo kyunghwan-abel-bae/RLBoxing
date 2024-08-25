@@ -101,6 +101,8 @@ for e in range(episodes_start, episodes):
 
         total_reward += reward if reward > 0 else 0
 
+        # print(f"action : {action}")
+
         agent.update_replay_memory(state, action, reward, next_state, done)
 
         actor_loss, critic_loss = agent.learn()#state, action, reward, next_state, done)
@@ -121,7 +123,7 @@ for e in range(episodes_start, episodes):
     mean_critic_losses = np.mean(critic_losses)
     bprint(f"[episode {e}] best_score at {best_e} : {best_score}, total_reward : {total_reward}, actor_losses : {mean_actor_losses}, critic_losses : {mean_critic_losses}, lr : {agent.optimizer.param_groups[0]['lr']}")
 
-    agent.scheduler.step()
+    # agent.scheduler.step()
 
     if total_reward > 99:
         bprint("KNOCK OUT")
@@ -140,5 +142,5 @@ for e in range(episodes_start, episodes):
         agent.save_model(e)
 
         # date_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-        filename = f"A2C_Log_[{num_frames}stack][init_lr_{agent.init_lr}][min_lr_{agent.min_lr}].txt"
+        filename = f"[Replaymemory]A2C_Log_[{num_frames}stack][init_lr_{agent.init_lr}][min_lr_{agent.min_lr}].txt"
         save_bprint(filename)
