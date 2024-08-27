@@ -6,6 +6,7 @@ from gym.spaces import Box
 from gym.wrappers import FrameStack, GrayScaleObservation, TransformObservation
 
 from agent import Agent
+from a2cagent import A2CAgent
 from metrics import MetricLogger
 from wrappers import ResizeObservation, AdapterGrayScaleObservation
 
@@ -28,9 +29,9 @@ env.reset()
 save_dir = Path("checkpoints") / datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')
 save_dir.mkdir(parents=True)
 
-checkpoint = Path('checkpoints/target/boxing_net_285.chkpt')
+checkpoint = Path('checkpoints/target/boxing_a2c_net.ckpt')
 
-agent = Agent(state_dim=(4, 84, 84), action_dim=env.action_space.n, save_dir=save_dir, checkpoint=checkpoint)
+agent = A2CAgent(state_dim=(4, 84, 84), action_dim=env.action_space.n, checkpoint=checkpoint)
 
 logger = MetricLogger(save_dir)
 
@@ -47,7 +48,7 @@ for e in range(episodes):
 
         total_reward += reward if reward > 0 else 0
 
-        agent.cache(state, next_state, action, reward, done)
+        # agent.cache(state, next_state, action, reward, done)
 
         logger.log_step(reward, None, None)
 

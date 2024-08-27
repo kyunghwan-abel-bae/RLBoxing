@@ -68,7 +68,7 @@ class A2CAgent:
         self.discount_factor = 0.9
         date_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         self.save_path = f"./saved_a2c/{date_time}"
-        self.load_path = f"./saved_a2c/20240705114408/ckpt"
+        self.load_path = checkpoint#f"./saved_a2c/20240705114408/ckpt"
         ##
 
         ## added
