@@ -16,6 +16,8 @@ from gym import spaces
 
 from utils import *
 
+from collections import deque
+
 class CustomActionSpaceWrapper(gym.ActionWrapper):
     def __init__(self, env):
         super(CustomActionSpaceWrapper, self).__init__(env)
@@ -88,6 +90,10 @@ if checkpoint:
 episodes = 3000
 best_score = 0
 best_e = 0
+
+last_3_total_rewards = deque(maxlen=4)
+knock_out_count = 0
+
 for e in range(episodes_start, episodes):
     state = env.reset()
     total_reward = 0
@@ -121,16 +127,21 @@ for e in range(episodes_start, episodes):
 
     mean_actor_losses = np.mean(actor_losses)
     mean_critic_losses = np.mean(critic_losses)
-    bprint(f"[episode {e}] best_score at {best_e} : {best_score}, total_reward : {total_reward}, actor_losses : {mean_actor_losses}, critic_losses : {mean_critic_losses}, lr : {agent.optimizer.param_groups[0]['lr']}")
+    bprint(f"[episode {e}] best_score at {best_e} : {best_score}, knockout_count : {knock_out_count}, total_reward : {total_reward}, actor_losses : {mean_actor_losses}, critic_losses : {mean_critic_losses}, lr : {agent.optimizer.param_groups[0]['lr']}")
+    last_3_total_rewards.append(total_reward)
 
     # agent.scheduler.step()
 
     if total_reward > 99:
         bprint("KNOCK OUT")
+        knock_out_count += 1
         agent.write_summary(total_reward, mean_actor_losses, mean_critic_losses, e)
 
         agent.save_model(e)
-        break
+
+        bprint(f"sum(last 3 total rewards) : {sum(last_3_total_rewards)}")
+        if sum(last_3_total_rewards) > 340:
+            break
 
     # if e % 3 == 0:
     if e % 50 == 0:
