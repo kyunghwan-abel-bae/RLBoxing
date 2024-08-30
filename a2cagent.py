@@ -76,7 +76,7 @@ class A2CAgent:
         ## added
         self.min_replay_memory_size = 500
         self.replay_memory = deque(maxlen=10000)
-        self.batch_size = 16
+        self.batch_size = 32
         ## added
 
         self.use_cuda = torch.cuda.is_available()
