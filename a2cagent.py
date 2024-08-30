@@ -44,20 +44,20 @@ class A2CModel(nn.Module):
 
     def __build_cnn(self, c):
         return nn.Sequential(
-            nn.Conv2d(in_channels=c, out_channels=32, kernel_size=8, stride=4),
-            nn.BatchNorm2d(32),
-            nn.ReLU(),
-            nn.Conv2d(in_channels=32, out_channels=64, kernel_size=4, stride=2),
+            nn.Conv2d(in_channels=c, out_channels=64, kernel_size=8, stride=4, bias=False),
             nn.BatchNorm2d(64),
-            nn.ReLU(),
-            nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=1),
-            nn.BatchNorm2d(64),
-            nn.ReLU(),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(in_channels=64, out_channels=128, kernel_size=4, stride=2, bias=False),
+            nn.BatchNorm2d(128),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(in_channels=128, out_channels=128, kernel_size=3, stride=1, bias=False),
+            nn.BatchNorm2d(128),
+            nn.ReLU(inplace=True),
             Rearrange('b c h w -> b (c h w)'),
-            nn.Linear(3136, 1024),
-            nn.ReLU(),
-            nn.Linear(1024, 512),
-            nn.ReLU()
+            nn.Linear(6272, 1024, bias=False),
+            nn.ReLU(inplace=True),
+            nn.Linear(1024, 512, bias=False),
+            nn.ReLU(inplace=True)
         )
 
 
@@ -145,14 +145,14 @@ class A2CAgent:
         # print(f"pi.shape : {pi.shape}")
         # print(f"pi : {pi}")
 
-        '''
+        # '''
         action = torch.multinomial(pi, num_samples=1).cpu().numpy()[0]
 
         action = action[0]
-        '''
-        action = torch.argmax(pi)
+        # '''
+        # action = torch.argmax(pi)
 
-        print(f"action in act : {action}")
+        # print(f"action in act : {action}")
         return action
 
     # def learn(self, state, action, reward, next_state, done):

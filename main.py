@@ -137,7 +137,7 @@ for e in range(episodes_start, episodes):
         knock_out_count += 1
 
         for param_group in agent.optimizer.param_groups:
-            param_group['lr'] *= 0.1  # 새로운 학습률
+            param_group['lr'] *= 0.5  # 새로운 학습률
 
         agent.write_summary(total_reward, mean_actor_losses, mean_critic_losses, e)
 
@@ -157,5 +157,5 @@ for e in range(episodes_start, episodes):
         agent.save_model(e)
 
         # date_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-        filename = f"[Replaymemory]A2C_Log_[{num_frames}stack][init_lr_{agent.init_lr}][min_lr_{agent.min_lr}].txt"
+        filename = f"[Replay&Conv]A2C_Log_[{num_frames}stack][init_lr_{agent.init_lr}][min_lr_{agent.min_lr}].txt"
         save_bprint(filename)
