@@ -54,7 +54,9 @@ class A2CModel(nn.Module):
             nn.BatchNorm2d(64),
             nn.ReLU(),
             Rearrange('b c h w -> b (c h w)'),
-            nn.Linear(3136, 512),
+            nn.Linear(3136, 1024),
+            nn.ReLU(),
+            nn.Linear(1024, 512),
             nn.ReLU()
         )
 
@@ -143,12 +145,14 @@ class A2CAgent:
         # print(f"pi.shape : {pi.shape}")
         # print(f"pi : {pi}")
 
+        '''
         action = torch.multinomial(pi, num_samples=1).cpu().numpy()[0]
 
-        # print(f"action in act : {action}")
         action = action[0]
+        '''
+        action = torch.argmax(pi)
 
-        # print(f"action in act : {action}")
+        print(f"action in act : {action}")
         return action
 
     # def learn(self, state, action, reward, next_state, done):

@@ -42,7 +42,7 @@ save_dir = Path("checkpoints") / datetime.datetime.now().strftime('%Y-%m-%dT%H-%
 save_dir.mkdir(parents=True)
 
 # checkpoint = None  # Path('checkpoints/2020-10-21T18-25-27/mario.chkpt')
-checkpoint = Path('checkpoints/target/boxing_a2c_net2.ckpt')
+checkpoint = Path('checkpoints/target/boxing_a2c_net3.ckpt')
 
 # 16 : batch size
 agent = A2CAgent(state_dim=(num_frames, 84, 84), action_dim=env.action_space.n, checkpoint=checkpoint, func_print=bprint)
