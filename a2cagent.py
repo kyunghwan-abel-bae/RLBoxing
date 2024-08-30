@@ -54,7 +54,9 @@ class A2CModel(nn.Module):
             nn.BatchNorm2d(64),
             nn.ReLU(),
             Rearrange('b c h w -> b (c h w)'),
-            nn.Linear(3136, 512),
+            nn.Linear(3136, 1024),
+            nn.ReLU(),
+            nn.Linear(1024, 512),
             nn.ReLU()
         )
 
@@ -74,7 +76,7 @@ class A2CAgent:
         ## added
         self.min_replay_memory_size = 500
         self.replay_memory = deque(maxlen=10000)
-        self.batch_size = 16
+        self.batch_size = 32
         ## added
 
         self.use_cuda = torch.cuda.is_available()

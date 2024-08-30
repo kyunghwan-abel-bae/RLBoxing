@@ -135,6 +135,10 @@ for e in range(episodes_start, episodes):
     if total_reward > 99:
         bprint("KNOCK OUT")
         knock_out_count += 1
+
+        for param_group in agent.optimizer.param_groups:
+            param_group['lr'] *= 0.1  # 새로운 학습률
+
         agent.write_summary(total_reward, mean_actor_losses, mean_critic_losses, e)
 
         agent.save_model(e)
