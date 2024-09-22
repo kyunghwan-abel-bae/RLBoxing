@@ -54,10 +54,8 @@ class A2CModel(nn.Module):
             nn.BatchNorm2d(128),
             nn.ReLU(inplace=True),
             Rearrange('b c h w -> b (c h w)'),
-            nn.Linear(6272, 1024, bias=False),
+            nn.Linear(6272, 512, bias=False),
             nn.ReLU(inplace=True),
-            nn.Linear(1024, 512, bias=False),
-            nn.ReLU(inplace=True)
         )
 
 
