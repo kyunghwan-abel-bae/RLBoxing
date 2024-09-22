@@ -5,6 +5,9 @@ from skimage import transform
 
 from gym.spaces import Box
 
+# need to comment below
+# import matplotlib.pyplot as plt
+
 
 class ResizeObservation(gym.ObservationWrapper):
     def __init__(self, env, shape):
@@ -18,7 +21,9 @@ class ResizeObservation(gym.ObservationWrapper):
         self.observation_space = Box(low=0, high=255, shape=obs_shape, dtype=np.uint8)
 
     def observation(self, observation):
-        resize_obs = transform.resize(observation, self.shape)
+        cropped_observation = observation[35:180, 30:130]
+
+        resize_obs = transform.resize(cropped_observation, self.shape)
         # cast float back to uint8
         resize_obs *= 255
         resize_obs = resize_obs.astype(np.uint8)
