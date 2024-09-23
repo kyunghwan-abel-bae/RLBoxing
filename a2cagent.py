@@ -153,6 +153,13 @@ class A2CAgent:
         # print(f"action in act : {action}")
         return action
 
+    def act_prob(self, state, training=True):
+        self.model.train(training)
+
+        pi, _ = self.model(torch.FloatTensor(state).to(self.device))
+
+        return pi
+
     # def learn(self, state, action, reward, next_state, done):
     def learn(self):#, state, action, reward, next_state, done):
         if len(self.replay_memory) < self.min_replay_memory_size:
