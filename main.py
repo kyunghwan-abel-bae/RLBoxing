@@ -75,8 +75,8 @@ env.reset()
 save_dir = Path("checkpoints") / datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')
 save_dir.mkdir(parents=True)
 
-# checkpoint = None  # Path('checkpoints/2020-10-21T18-25-27/mario.chkpt')
 checkpoint = None  # Path('checkpoints/2020-10-21T18-25-27/mario.chkpt')
+# checkpoint = Path('saved_a2c/20240923042954/ckpt')  # Path('checkpoints/2020-10-21T18-25-27/mario.chkpt')
 
 # 16 : batch size
 agent = A2CAgent(state_dim=(num_frames, 84, 84), action_dim=env.action_space.n, checkpoint=checkpoint, func_print=bprint)
@@ -87,7 +87,7 @@ episodes_start = 0
 if checkpoint:
     episodes_start = agent.data_load.get("episode") + 1
 
-episodes = 3000
+episodes = 30000
 best_score = 0
 best_e = 0
 
@@ -108,8 +108,9 @@ for e in range(episodes_start, episodes):
         total_reward += reward if reward > 0 else 0
 
         # print(f"action : {action}")
-
-        agent.update_replay_memory(state, action, reward, next_state, done)
+        # if (reward == 1) or (reward == -1):
+        if reward > -1:
+            agent.update_replay_memory(state, action, reward, next_state, done)
 
         actor_loss, critic_loss = agent.learn()#state, action, reward, next_state, done)
 
@@ -130,7 +131,7 @@ for e in range(episodes_start, episodes):
     bprint(f"[episode {e}] best_score at {best_e} : {best_score}, knockout_count : {knock_out_count}, total_reward : {total_reward}, actor_losses : {mean_actor_losses}, critic_losses : {mean_critic_losses}, lr : {agent.optimizer.param_groups[0]['lr']}")
     last_3_total_rewards.append(total_reward)
 
-    # agent.scheduler.step()
+    agent.scheduler.step()
 
     if total_reward > 99:
         bprint("KNOCK OUT")
@@ -144,6 +145,9 @@ for e in range(episodes_start, episodes):
         agent.save_model(e)
 
         bprint(f"sum(last 3 total rewards) : {sum(last_3_total_rewards)}")
+
+        # newly updated
+        # break
         if sum(last_3_total_rewards) > 340:
             break
 
@@ -157,5 +161,5 @@ for e in range(episodes_start, episodes):
         agent.save_model(e)
 
         # date_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-        filename = f"[Replay&Conv]A2C_Log_[{num_frames}stack][init_lr_{agent.init_lr}][min_lr_{agent.min_lr}].txt"
+        filename = f"[Reward01]A2C_Log_[{num_frames}stack][init_lr_{agent.init_lr}][min_lr_{agent.min_lr}].txt"
         save_bprint(filename)

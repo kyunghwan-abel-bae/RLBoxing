@@ -108,7 +108,7 @@ class A2CAgent:
 
         # lambda_lr = lambda epoch: max(self.min_lr, self.init_lr*(0.995 ** epoch))
         # self.scheduler = optim.lr_scheduler.LambdaLR(self.optimizer, lr_lambda=lambda_lr)
-        self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=1000, eta_min=self.min_lr)
+        self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=300, eta_min=self.min_lr)
 
         self.writer = SummaryWriter(self.save_path)
 
@@ -156,6 +156,7 @@ class A2CAgent:
     # def learn(self, state, action, reward, next_state, done):
     def learn(self):#, state, action, reward, next_state, done):
         if len(self.replay_memory) < self.min_replay_memory_size:
+            print(f"NOT ENOUGH MEMORY : current replay memory : {len(self.replay_memory)}")
             return -1, -1
 
         samples = random.sample(self.replay_memory, self.batch_size)
