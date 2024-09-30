@@ -87,7 +87,7 @@ episodes_start = 0
 if checkpoint:
     episodes_start = agent.data_load.get("episode") + 1
 
-episodes = 30000
+episodes = 500
 best_score = 0
 best_e = 0
 
@@ -148,7 +148,7 @@ for e in range(episodes_start, episodes):
 
         # newly updated
         # break
-        if sum(last_3_total_rewards) > 340:
+        if sum(last_3_total_rewards) > 300:
             break
 
     # if e % 3 == 0:
