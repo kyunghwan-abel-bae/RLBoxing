@@ -1,3 +1,4 @@
+import copy
 import datetime
 import random
 
@@ -59,7 +60,12 @@ class A2CModel(nn.Module):
         )
 
 
-class A2CAgent:
+def reset_weights(m):
+    if hasattr(m, 'reset_parameters'):
+        m.reset_parameters()
+
+
+class EnAgent:
     def __init__(self, state_dim, action_dim, checkpoint=None, func_print=None):
         self.state_dim = state_dim
         self.action_dim = action_dim
@@ -82,6 +88,7 @@ class A2CAgent:
         model_state_dim = (self.batch_size,) + self.state_dim
         model_action_dim = (self.batch_size, self.action_dim)
         self.model = A2CModel(model_state_dim, model_action_dim).float()
+        self.target_model = copy.deepcopy(self.model)
 
         self.device = "cpu"
         if self.use_cuda:
@@ -108,7 +115,7 @@ class A2CAgent:
 
         # lambda_lr = lambda epoch: max(self.min_lr, self.init_lr*(0.995 ** epoch))
         # self.scheduler = optim.lr_scheduler.LambdaLR(self.optimizer, lr_lambda=lambda_lr)
-        self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=300, eta_min=self.min_lr)
+        self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=1000, eta_min=self.min_lr)
 
         self.writer = SummaryWriter(self.save_path)
 
@@ -125,55 +132,37 @@ class A2CAgent:
 
         self.replay_memory.append((state, action, reward, next_state, done))
 
-    def act(self, state, training=True):
-        # if len(self.replay_memory) < self.min_replay_memory_size:
-        #     return random.randint(0, self.action_dim-1)
-
+    def act(self, state, training=True, target_annealing=False):
         self.model.train(training)
 
-        pi, _ = self.model(torch.FloatTensor(state).to(self.device))
+        pi, _ = self.target_model(torch.FloatTensor(state).to(self.device)) if target_annealing \
+            else self.model(torch.FloatTensor(state).to(self.device))
 
         self.pi_counter += 1
         if self.pi_counter % 500 == 0:
-            self.func_print(f"pi : {pi}")
+            self.func_print(f"[{target_annealing} target]pi : {pi}")
             self.pi_counter = 0
 
-        # if torch.isnan(pi).any() or torch.isinf(pi).any() or (pi < 0).any():
-        #     print("Invalid values in probability tensor:", pi)
-        # print(f"pi.shape : {pi.shape}")
-        # print(f"pi : {pi}")
-
-        # '''
         action = torch.multinomial(pi, num_samples=1).cpu().numpy()[0]
 
         action = action[0]
-        # '''
-        # action = torch.argmax(pi)
 
-        # print(f"action in act : {action}")
         return action
 
-    def act_prob(self, state, training=True):
-        self.model.train(training)
-
-        pi, _ = self.model(torch.FloatTensor(state).to(self.device))
-
-        return pi
-
     # def learn(self, state, action, reward, next_state, done):
-    def learn(self):#, state, action, reward, next_state, done):
+    def learn(self, target_annealing=False):#, state, action, reward, next_state, done):
         if len(self.replay_memory) < self.min_replay_memory_size:
-            print(f"NOT ENOUGH MEMORY : current replay memory : {len(self.replay_memory)}")
             return -1, -1
 
         samples = random.sample(self.replay_memory, self.batch_size)
 
         state, action, reward, next_state, done = map(torch.stack, zip(*samples))
 
-        pi, value = self.model(state)
+        pi, value = self.target_model(state) if target_annealing else self.model(state)
 
         with torch.no_grad():
-            _, next_value = self.model(next_state)
+            _, next_value = self.target_model(next_state) if target_annealing else self.model(next_state)
+
             target_value = reward + (1-done.float()) * self.discount_factor * next_value
 
         critic_loss = F.mse_loss(value, target_value)
@@ -196,6 +185,16 @@ class A2CAgent:
 
         return actor_loss.item(), critic_loss.item()
 
+    def update_target(self):
+        tau = 0.3
+        for target_param, local_param in zip(self.target_model.parameters(), self.model.parameters()):
+            target_param.data.copy_(tau * local_param.data + (1.0 - tau) * target_param.data)
+        # for target_param, local_param in zip(self.target_model.parameters(), self.critic.parameters()):
+        #     target_param.data.copy_(tau * local_param.data + (1.0 - tau) * target_param.data)
+
+    def init_model_weights(self):
+        self.model.apply(reset_weights)
+
     def save_model(self, num_episode):
         print(f"... Save Model to {self.save_path}")
         torch.save({
@@ -205,14 +204,18 @@ class A2CAgent:
             "lr": float(self.optimizer.param_groups[0]['lr'])
         }, self.save_path+'/ckpt')
 
+        torch.save({
+            "episode": int(num_episode),
+            "network": self.target_model.state_dict(),
+            "optimizer": self.optimizer.state_dict(),
+            "lr": float(self.optimizer.param_groups[0]['lr'])
+        }, self.save_path + '/target_ckpt')
+
     # def load_model(self, load_path):
     #     print("implementing")
     #     if not load_path.exists():
     #         raise ValueError(f"{load_path} does not exist")
-
     def write_summary(self, score, actor_loss, critic_loss, step):
         self.writer.add_scalar("run/score", score, step)
         self.writer.add_scalar("model/actor_loss", actor_loss, step)
         self.writer.add_scalar("model/critic_loss", critic_loss, step)
-
-
