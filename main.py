@@ -8,7 +8,8 @@ import torch
 from gym.spaces import Box
 from gym.wrappers import FrameStack, GrayScaleObservation, TransformObservation
 
-from a2cagent import A2CAgent
+# from a2cagent import A2CAgent
+from enagent import EnAgent
 from metrics import MetricLogger
 from wrappers import ResizeObservation, AdapterGrayScaleObservation, SkipFrame
 
@@ -17,6 +18,7 @@ from gym import spaces
 from utils import *
 
 from collections import deque
+
 
 class CustomActionSpaceWrapper(gym.ActionWrapper):
     def __init__(self, env):
@@ -78,7 +80,7 @@ save_dir.mkdir(parents=True)
 checkpoint = None  # Path('checkpoints/2020-10-21T18-25-27/mario.chkpt')
 
 # 16 : batch size
-agent = A2CAgent(state_dim=(num_frames, 84, 84), action_dim=env.action_space.n, checkpoint=checkpoint, func_print=bprint)
+agent = EnAgent(state_dim=(num_frames, 84, 84), action_dim=env.action_space.n, checkpoint=checkpoint, func_print=bprint)
 
 logger = MetricLogger(save_dir)
 
@@ -86,12 +88,16 @@ episodes_start = 0
 if checkpoint:
     episodes_start = agent.data_load.get("episode") + 1
 
-episodes = 3000
+episodes = 30
 best_score = 0
 best_e = 0
 
 last_3_total_rewards = deque(maxlen=4)
 knock_out_count = 0
+
+interval_init = 3#5
+interval_target = 9#20
+enable_target_annealing = False
 
 for e in range(episodes_start, episodes):
     state = env.reset()
@@ -99,8 +105,16 @@ for e in range(episodes_start, episodes):
 
     actor_losses, critic_losses, scores = [], [], []
 
+    if e % interval_init == 0:
+        enable_target_annealing = False
+        agent.init_model_weights()
+
+    if e % interval_target == 0:
+        enable_target_annealing = True
+        agent.update_target()
+
     while True:
-        action = agent.act([state])
+        action = agent.act([state], enable_target_annealing)
 
         next_state, reward, done, info = env.step(action)
 
@@ -110,7 +124,7 @@ for e in range(episodes_start, episodes):
 
         agent.update_replay_memory(state, action, reward, next_state, done)
 
-        actor_loss, critic_loss = agent.learn()#state, action, reward, next_state, done)
+        actor_loss, critic_loss = agent.learn(enable_target_annealing)#state, action, reward, next_state, done)
 
         actor_losses.append(actor_loss)
         critic_losses.append(critic_loss)

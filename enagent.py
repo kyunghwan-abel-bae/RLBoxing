@@ -140,7 +140,7 @@ class EnAgent:
 
         self.pi_counter += 1
         if self.pi_counter % 500 == 0:
-            self.func_print(f"pi : {pi}")
+            self.func_print(f"[{target_annealing} target]pi : {pi}")
             self.pi_counter = 0
 
         action = torch.multinomial(pi, num_samples=1).cpu().numpy()[0]
@@ -185,22 +185,12 @@ class EnAgent:
 
         return actor_loss.item(), critic_loss.item()
 
-'''
-    def soft_update_target(self):
-        for target_param, local_param in zip(self.target_actor.parameters(), self.actor.parameters()):
-            target_param.data.copy_(tau * local_param.data + (1.0 - tau) * target_param.data)
-        for target_param, local_param in zip(self.target_critic.parameters(), self.critic.parameters()):
-            target_param.data.copy_(tau * local_param.data + (1.0 - tau) * target_param.data)
-
-'''
-
     def update_target(self):
         tau = 0.3
         for target_param, local_param in zip(self.target_model.parameters(), self.model.parameters()):
             target_param.data.copy_(tau * local_param.data + (1.0 - tau) * target_param.data)
         # for target_param, local_param in zip(self.target_model.parameters(), self.critic.parameters()):
         #     target_param.data.copy_(tau * local_param.data + (1.0 - tau) * target_param.data)
-
 
     def init_model_weights(self):
         self.model.apply(reset_weights)
@@ -225,10 +215,7 @@ class EnAgent:
     #     print("implementing")
     #     if not load_path.exists():
     #         raise ValueError(f"{load_path} does not exist")
-
     def write_summary(self, score, actor_loss, critic_loss, step):
         self.writer.add_scalar("run/score", score, step)
         self.writer.add_scalar("model/actor_loss", actor_loss, step)
         self.writer.add_scalar("model/critic_loss", critic_loss, step)
-
-
