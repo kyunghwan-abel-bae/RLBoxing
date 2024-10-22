@@ -98,6 +98,7 @@ class EnAgent:
 
         self.init_lr = 2e-6
         self.min_lr = 1e-7
+        self.target_lr = 3e-7
         #
         self.func_print = func_print
 
@@ -190,8 +191,11 @@ class EnAgent:
         tau = 0.3
         for target_param, local_param in zip(self.target_model.parameters(), self.model.parameters()):
             target_param.data.copy_(tau * local_param.data + (1.0 - tau) * target_param.data)
-        # for target_param, local_param in zip(self.target_model.parameters(), self.critic.parameters()):
-        #     target_param.data.copy_(tau * local_param.data + (1.0 - tau) * target_param.data)
+
+    def update_learning_rate(self, new_lr):
+        for param_group in self.optimizer.param_groups:
+            param_group['lr'] = new_lr
+
 
     def init_model_weights(self):
         self.model.apply(reset_weights)

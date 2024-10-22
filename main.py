@@ -85,6 +85,9 @@ agent = EnAgent(state_dim=(num_frames, 84, 84), action_dim=env.action_space.n, c
 logger = MetricLogger(save_dir)
 
 episodes_start = 1
+
+
+
 if checkpoint:
     episodes_start = agent.data_load.get("episode") + 1
 
@@ -95,8 +98,8 @@ best_e = 0
 last_3_total_rewards = deque(maxlen=4)
 knock_out_count = 0
 
-interval_init = 5
-interval_target = 20
+interval_init = 5#5
+interval_target = 10#20
 enable_target_annealing = False
 
 for e in range(episodes_start, episodes):
@@ -107,9 +110,11 @@ for e in range(episodes_start, episodes):
 
     if e % interval_target == 0:
         enable_target_annealing = True
+        agent.update_learning_rate(agent.target_lr)
     elif e % interval_init == 0 and enable_target_annealing == True:
         enable_target_annealing = False
         agent.init_model_weights()
+        agent.update_learning_rate(agent.init_lr)
     elif e % interval_init == 0 and enable_target_annealing == False:
         agent.update_target()
         agent.init_model_weights()
