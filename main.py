@@ -84,19 +84,19 @@ agent = EnAgent(state_dim=(num_frames, 84, 84), action_dim=env.action_space.n, c
 
 logger = MetricLogger(save_dir)
 
-episodes_start = 0
+episodes_start = 1
 if checkpoint:
     episodes_start = agent.data_load.get("episode") + 1
 
-episodes = 30
+episodes = 205
 best_score = 0
 best_e = 0
 
 last_3_total_rewards = deque(maxlen=4)
 knock_out_count = 0
 
-interval_init = 3#5
-interval_target = 9#20
+interval_init = 5
+interval_target = 20
 enable_target_annealing = False
 
 for e in range(episodes_start, episodes):
@@ -105,16 +105,17 @@ for e in range(episodes_start, episodes):
 
     actor_losses, critic_losses, scores = [], [], []
 
-    if e % interval_init == 0:
-        enable_target_annealing = False
-        agent.init_model_weights()
-
     if e % interval_target == 0:
         enable_target_annealing = True
+    elif e % interval_init == 0 and enable_target_annealing == True:
+        enable_target_annealing = False
+        agent.init_model_weights()
+    elif e % interval_init == 0 and enable_target_annealing == False:
         agent.update_target()
+        agent.init_model_weights()
 
     while True:
-        action = agent.act([state], enable_target_annealing)
+        action = agent.act([state], target_annealing=enable_target_annealing)
 
         next_state, reward, done, info = env.step(action)
 
@@ -124,7 +125,7 @@ for e in range(episodes_start, episodes):
 
         agent.update_replay_memory(state, action, reward, next_state, done)
 
-        actor_loss, critic_loss = agent.learn(enable_target_annealing)#state, action, reward, next_state, done)
+        actor_loss, critic_loss = agent.learn(target_annealing=enable_target_annealing)#state, action, reward, next_state, done)
 
         actor_losses.append(actor_loss)
         critic_losses.append(critic_loss)

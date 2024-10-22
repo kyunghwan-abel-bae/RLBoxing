@@ -93,9 +93,10 @@ class EnAgent:
         self.device = "cpu"
         if self.use_cuda:
             self.model = self.model.to(device='cuda')
+            self.target_model = self.target_model.to(device='cuda')
             self.device = "cuda"
 
-        self.init_lr = 1e-6
+        self.init_lr = 2e-6
         self.min_lr = 1e-7
         #
         self.func_print = func_print
