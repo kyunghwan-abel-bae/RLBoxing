@@ -91,15 +91,15 @@ episodes_start = 1
 if checkpoint:
     episodes_start = agent.data_load.get("episode") + 1
 
-episodes = 205
+episodes = 10000
 best_score = 0
 best_e = 0
 
 last_3_total_rewards = deque(maxlen=4)
 knock_out_count = 0
 
-interval_init = 5#5
-interval_target = 10#20
+interval_init = 300
+interval_target = 10000
 enable_target_annealing = False
 
 for e in range(episodes_start, episodes):
@@ -116,7 +116,7 @@ for e in range(episodes_start, episodes):
         agent.init_model_weights()
         agent.update_learning_rate(agent.init_lr)
     elif e % interval_init == 0 and enable_target_annealing == False:
-        agent.update_target()
+        # agent.update_target()
         agent.init_model_weights()
 
     while True:
@@ -155,8 +155,13 @@ for e in range(episodes_start, episodes):
         bprint("KNOCK OUT")
         knock_out_count += 1
 
-        for param_group in agent.optimizer.param_groups:
-            param_group['lr'] *= 0.5  # 새로운 학습률
+        # for param_group in agent.optimizer.param_groups:
+        #     param_group['lr'] *= 0.5  # 새로운 학습률
+        agent.tau = min(0.8, (agent.tau + 0.05 * knock_out_count))
+        agent.update_target()
+
+        enable_target_annealing = True
+        agent.update_learning_rate(agent.target_lr)
 
         agent.write_summary(total_reward, mean_actor_losses, mean_critic_losses, e)
 

@@ -96,9 +96,11 @@ class EnAgent:
             self.target_model = self.target_model.to(device='cuda')
             self.device = "cuda"
 
-        self.init_lr = 2e-6
+        self.init_lr = 1e-6
         self.min_lr = 1e-7
         self.target_lr = 3e-7
+
+        self.tau = 0.3
         #
         self.func_print = func_print
 
@@ -188,9 +190,8 @@ class EnAgent:
         return actor_loss.item(), critic_loss.item()
 
     def update_target(self):
-        tau = 0.3
         for target_param, local_param in zip(self.target_model.parameters(), self.model.parameters()):
-            target_param.data.copy_(tau * local_param.data + (1.0 - tau) * target_param.data)
+            target_param.data.copy_(self.tau * local_param.data + (1.0 - self.tau) * target_param.data)
 
     def update_learning_rate(self, new_lr):
         for param_group in self.optimizer.param_groups:
