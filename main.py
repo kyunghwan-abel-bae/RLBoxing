@@ -126,35 +126,34 @@ for e in range(episodes_start, episodes):
 
     mean_actor_losses = np.mean(actor_losses)
     mean_critic_losses = np.mean(critic_losses)
-    bprint(f"[episode {e}] best_score at {best_e} : {best_score}, knockout_count : {knock_out_count}, total_reward : {total_reward}, actor_losses : {mean_actor_losses}, critic_losses : {mean_critic_losses}, lr : {agent.optimizer.param_groups[0]['lr']}")
+    bprint(f"[episode {e}] best_score at {best_e} : {best_score}, knockout_count : {knock_out_count}, total_reward : {total_reward}, "
+           f"actor_losses : {mean_actor_losses}, critic_losses : {mean_critic_losses}, "
+           f"lr : {agent.actor_optimizer.param_groups[0]['lr']}, alpha: {agent.alpha.item():.4f}")
     last_3_total_rewards.append(total_reward)
-
-    # agent.scheduler.step()
 
     if total_reward > 99:
         bprint("KNOCK OUT")
         knock_out_count += 1
 
-        for param_group in agent.optimizer.param_groups:
-            param_group['lr'] *= 0.5  # 새로운 학습률
+        # Update learning rates for all optimizers
+        for optimizer in [agent.actor_optimizer, agent.critic1_optimizer, agent.critic2_optimizer]:
+            for param_group in optimizer.param_groups:
+                param_group['lr'] *= 0.5
 
         agent.write_summary(total_reward, mean_actor_losses, mean_critic_losses, e)
-
         agent.save_model(e)
 
         bprint(f"sum(last 3 total rewards) : {sum(last_3_total_rewards)}")
         if sum(last_3_total_rewards) > 340:
             break
 
-    # if e % 3 == 0:
     if e % 50 == 0:
-        print(f"total reward : {total_reward}")#, str_temp)
+        print(f"total reward : {total_reward}")
 
         capture_state(state, e)
 
         agent.write_summary(total_reward, actor_loss, critic_loss, e)
         agent.save_model(e)
 
-        # date_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-        filename = f"[Replay&Conv]A2C_Log_[{num_frames}stack][init_lr_{agent.init_lr}][min_lr_{agent.min_lr}].txt"
+        filename = f"[SAC-style]A2C_Log_[{num_frames}stack][init_lr_{agent.init_lr}][min_lr_{agent.min_lr}].txt"
         save_bprint(filename)
