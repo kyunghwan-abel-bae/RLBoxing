@@ -144,18 +144,20 @@ class A2CAgent:
         self.pi_counter = 0
 
     def update_replay_memory(self, state, action, reward, next_state, done):
-        state = torch.FloatTensor(state).cuda() if torch.cuda.is_available() else torch.FloatTensor(state)
-        next_state = torch.FloatTensor(next_state).cuda() if torch.cuda.is_available() else torch.FloatTensor(next_state)
-        action = torch.LongTensor([action]).cuda() if torch.cuda.is_available() else torch.LongTensor([action])
-        reward = torch.FloatTensor([reward]).cuda() if torch.cuda.is_available() else torch.FloatTensor([reward])
-        done = torch.BoolTensor([done]).cuda() if torch.cuda.is_available() else torch.BoolTensor([done])
+        # Move tensors to the appropriate device before storing
+        state = torch.FloatTensor(state).to(self.device)
+        next_state = torch.FloatTensor(next_state).to(self.device)
+        action = torch.LongTensor([action]).to(self.device)
+        reward = torch.FloatTensor([reward]).to(self.device)
+        done = torch.BoolTensor([done]).to(self.device)
 
         self.replay_memory.append((state, action, reward, next_state, done))
 
     def act(self, state, training=True):
         self.actor.train(training)
         
-        pi = self.actor(torch.FloatTensor(state).to(self.device))
+        state = torch.FloatTensor(state).to(self.device)
+        pi = self.actor(state)
 
         self.pi_counter += 1
         if self.pi_counter % 500 == 0:
@@ -171,6 +173,13 @@ class A2CAgent:
 
         samples = random.sample(self.replay_memory, self.batch_size)
         state, action, reward, next_state, done = map(torch.stack, zip(*samples))
+
+        # Move all tensors to the same device
+        state = state.to(self.device)
+        action = action.to(self.device)
+        reward = reward.to(self.device)
+        next_state = next_state.to(self.device)
+        done = done.to(self.device)
 
         # Actor forward pass
         pi = self.actor(state)
