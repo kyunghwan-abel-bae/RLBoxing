@@ -5,14 +5,14 @@ import gymnasium as gym
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-from gym.spaces import Box
-from gym.wrappers import FrameStack, GrayScaleObservation, TransformObservation
+from gymnasium.spaces import Box
+from gymnasium.wrappers import FrameStack, GrayScaleObservation, TransformObservation
 
 from a2cagent import A2CAgent
 from metrics import MetricLogger
 from wrappers import ResizeObservation, AdapterGrayScaleObservation, SkipFrame
 
-from gym import spaces
+from gymnasium import spaces
 
 from utils import *
 
@@ -57,7 +57,7 @@ episodes = 5000
 best_score = 0
 best_e = 0
 for e in range(episodes_start, episodes):
-    state = env.reset()
+    state, _ = env.reset()
     total_reward = 0
 
     actor_losses, critic_losses, scores = [], [], []
@@ -67,7 +67,8 @@ for e in range(episodes_start, episodes):
 
         action = agent.act([state], False)
 
-        next_state, reward, done, info = env.step(action)
+        next_state, reward, terminated, truncated, info = env.step(action)
+        done = terminated or truncated
 
         total_reward += reward if reward > 0 else 0
 

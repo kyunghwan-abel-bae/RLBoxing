@@ -1,9 +1,9 @@
-import gym
+import gymnasium as gym
 import torch
 import random, datetime, numpy as np
 from skimage import transform
 
-from gym.spaces import Box
+from gymnasium.spaces import Box
 
 # need to comment below
 # import matplotlib.pyplot as plt
@@ -39,19 +39,19 @@ class SkipFrame(gym.Wrapper):
     def step(self, action):
         """Repeat action, and sum reward"""
         total_reward = 0.0
-        done = False
+        terminated = False
+        truncated = False
         for i in range(self._skip):
             # Accumulate reward and repeat the same action
-            obs, reward, done, truncated, info = self.env.step(action)
+            obs, reward, terminated, truncated, info = self.env.step(action)
             total_reward += reward
-            if done:
+            if terminated or truncated:
                 break
 
-        return obs, total_reward, done, info
+        return obs, total_reward, terminated, truncated, info
 
     def reset(self, **kwargs):
-        obs = self.env.reset(**kwargs)
-        return obs[0]
+        return self.env.reset(**kwargs)
 
 
 class AdapterGrayScaleObservation(gym.Wrapper):
@@ -59,9 +59,7 @@ class AdapterGrayScaleObservation(gym.Wrapper):
         super().__init__(env)
 
     def step(self, action):
-        obs, reward, done, truncated, info = self.env.step(action)
-        return obs, reward, done, info
+        return self.env.step(action)
 
     def reset(self, **kwargs):
-        obs = self.env.reset(**kwargs)
-        return obs[0]
+        return self.env.reset(**kwargs)
