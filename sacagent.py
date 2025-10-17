@@ -145,3 +145,30 @@ class SACAgent:
         else:
             # N-step sampling logic will be implemented here later
             raise NotImplementedError(f"N-step sampling for n_step={self.n_step} is not implemented yet.")
+
+    def act(self, state, training=True):
+        """
+        Selects an action for a single state.
+        During the initial exploration phase, it returns a random action.
+        Otherwise, it uses the policy network to sample an action.
+        """
+        # Take random actions until the replay buffer has collected a minimum number of experiences
+        if len(self.replay_memory) < self.min_replay_memory_size:
+            return random.randrange(self.action_dim)
+
+        # state is a LazyFrame or np.array
+        state_arr = np.array(state, dtype=np.uint8)
+        # Add a batch dimension, convert to float tensor, normalize, and send to device
+        state_tensor = torch.as_tensor(state_arr, dtype=torch.float32, device=self.device).unsqueeze(0) / 255.0
+
+        # Set the network to evaluation or training mode and get action probabilities
+        self.actor.train(training)
+        with torch.no_grad():
+            pi = self.actor(state_tensor)
+
+            # Use Categorical distribution for sampling
+            dist = torch.distributions.Categorical(probs=pi)
+            action = dist.sample()
+
+        # Return the action as a Python integer
+        return action.item()
