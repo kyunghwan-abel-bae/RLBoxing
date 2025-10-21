@@ -85,6 +85,21 @@ class CriticNetwork(nn.Module):
         return self.head(x)
 
 
+class DoubleQNetwork(nn.Module):
+    """
+    A container for two Q-networks (Critic), as per the user's design.
+    Each critic is an independent network with its own CNN encoder.
+    """
+    def __init__(self, input_dim, output_dim):
+        super().__init__()
+        self.q1 = CriticNetwork(input_dim, output_dim)
+        self.q2 = CriticNetwork(input_dim, output_dim)
+        
+    def forward(self, state):
+        # Return the Q-values from both critics
+        return self.q1(state), self.q2(state)
+
+
 class SACAgent:
     def __init__(self, state_dim, action_dim):
         self.state_dim = state_dim
@@ -111,14 +126,10 @@ class SACAgent:
 
         # Networks
         self.actor = ActorNetwork(model_state_dim, model_action_dim).float().to(self.device)
-        self.critic1 = CriticNetwork(model_state_dim, model_action_dim).float().to(self.device)
-        self.critic2 = CriticNetwork(model_state_dim, model_action_dim).float().to(self.device)
-        self.critic_target1 = CriticNetwork(model_state_dim, model_action_dim).float().to(self.device)
-        self.critic_target2 = CriticNetwork(model_state_dim, model_action_dim).float().to(self.device)
+        self.q_network = DoubleQNetwork(model_state_dim, model_action_dim).float().to(self.device)
+        self.target_q_network = DoubleQNetwork(model_state_dim, model_action_dim).float().to(self.device)
 
-        # Initialize target networks with critic network weights
-        self.critic_target1.load_state_dict(self.critic1.state_dict())
-        self.critic_target2.load_state_dict(self.critic2.state_dict())
+        self.target_q_network.load_state_dict(self.q_network.state_dict())
 
     def update_replay_memory(self, state, action, reward, next_state, done):
         """Save experience to replay buffer.
