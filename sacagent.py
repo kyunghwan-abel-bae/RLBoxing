@@ -100,12 +100,15 @@ class DoubleQNetwork(nn.Module):
         return self.q1(state), self.q2(state)
 
 
+from torch.utils.tensorboard import SummaryWriter
+
 class SACAgent:
-    def __init__(self, state_dim, action_dim, lr=3e-4, gamma=0.99, tau=0.005):
+    def __init__(self, state_dim, action_dim, save_dir, lr=3e-4, gamma=0.99, tau=0.005):
         self.state_dim = state_dim
         self.action_dim = action_dim
         self.gamma = gamma
         self.tau = tau
+        self.save_dir = save_dir
 
         # Device selection
         self.device = "cpu"
@@ -138,6 +141,9 @@ class SACAgent:
         self.alpha = self.log_alpha.exp()
         self.target_entropy = -torch.log(1 / torch.tensor(self.action_dim)) * 0.98
         self.alpha_optimizer = torch.optim.Adam([self.log_alpha], lr=lr)
+
+        # For logging
+        self.writer = SummaryWriter(self.save_dir)
 
     def update_replay_memory(self, state, action, reward, next_state, done):
         state_arr = np.array(state, dtype=np.uint8)
@@ -236,3 +242,22 @@ class SACAgent:
             target_param.data.copy_(self.tau * param.data + (1.0 - self.tau) * target_param.data)
             
         return actor_loss.item(), critic_loss.item()
+
+    def save_model(self, num_episode):
+        save_path = self.save_dir / "sac_agent.ckpt"
+        print(f"... Save Model to {save_path}")
+        torch.save({
+            "episode": int(num_episode),
+            "actor_state_dict": self.actor.state_dict(),
+            "critic_state_dict": self.q_network.state_dict(),
+            "actor_optimizer_state_dict": self.actor_optimizer.state_dict(),
+            "critic_optimizer_state_dict": self.critic_optimizer.state_dict(),
+            "alpha_optimizer_state_dict": self.alpha_optimizer.state_dict(),
+            "log_alpha": self.log_alpha,
+        }, save_path)
+
+    def write_summary(self, score, actor_loss, critic_loss, alpha, step):
+        self.writer.add_scalar("run/score", score, step)
+        self.writer.add_scalar("loss/actor_loss", actor_loss, step)
+        self.writer.add_scalar("loss/critic_loss", critic_loss, step)
+        self.writer.add_scalar("param/alpha", alpha, step)
