@@ -101,17 +101,11 @@ class DoubleQNetwork(nn.Module):
 
 
 class SACAgent:
-    def __init__(self, state_dim, action_dim):
+    def __init__(self, state_dim, action_dim, lr=3e-4, gamma=0.99, tau=0.005):
         self.state_dim = state_dim
         self.action_dim = action_dim
-
-        # N-step learning parameter, initialized to 1
-        self.n_step = 1
-
-        # Replay Memory
-        self.min_replay_memory_size = 1000
-        self.replay_memory = deque(maxlen=100000)
-        self.batch_size = 32
+        self.gamma = gamma
+        self.tau = tau
 
         # Device selection
         self.device = "cpu"
@@ -120,6 +114,11 @@ class SACAgent:
         elif torch.backends.mps.is_available():
             self.device = "mps"
 
+        # Replay Memory
+        self.min_replay_memory_size = 1000
+        self.replay_memory = deque(maxlen=100000)
+        self.batch_size = 32
+        
         # Network dimensions
         model_state_dim = (self.batch_size,) + self.state_dim
         model_action_dim = (self.batch_size, self.action_dim)
@@ -128,58 +127,112 @@ class SACAgent:
         self.actor = ActorNetwork(model_state_dim, model_action_dim).float().to(self.device)
         self.q_network = DoubleQNetwork(model_state_dim, model_action_dim).float().to(self.device)
         self.target_q_network = DoubleQNetwork(model_state_dim, model_action_dim).float().to(self.device)
-
         self.target_q_network.load_state_dict(self.q_network.state_dict())
 
+        # Optimizers
+        self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), lr=lr)
+        self.critic_optimizer = torch.optim.Adam(self.q_network.parameters(), lr=lr)
+
+        # Temperature parameter for entropy
+        self.log_alpha = torch.tensor(np.log(0.01), dtype=torch.float32, device=self.device, requires_grad=True)
+        self.alpha = self.log_alpha.exp()
+        self.target_entropy = -torch.log(1 / torch.tensor(self.action_dim)) * 0.98
+        self.alpha_optimizer = torch.optim.Adam([self.log_alpha], lr=lr)
+
     def update_replay_memory(self, state, action, reward, next_state, done):
-        """Save experience to replay buffer.
-    
-        States are stored as uint8 numpy arrays.
-        Action, reward, and done are stored as python native types.
-        """
-        # The LazyFrame from the environment wraps uint8 arrays.
-        # We convert it to a numpy array with the correct dtype.
         state_arr = np.array(state, dtype=np.uint8)
         next_state_arr = np.array(next_state, dtype=np.uint8)
-        
         self.replay_memory.append((state_arr, action, reward, next_state_arr, done))
 
     def _sample_experience(self):
-        """
-        Samples a batch of experience from the replay buffer.
-        This is where N-step logic will be implemented.
-        For now, with n_step=1, it performs standard random sampling.
-        """
-        if self.n_step == 1:
-            # Return a batch of experiences (as python native types and numpy arrays)
-            return random.sample(self.replay_memory, self.batch_size)
-        else:
-            # N-step sampling logic will be implemented here later
-            raise NotImplementedError(f"N-step sampling for n_step={self.n_step} is not implemented yet.")
+        return random.sample(self.replay_memory, self.batch_size)
 
+    @torch.no_grad()
     def act(self, state, training=True):
-        """
-        Selects an action for a single state.
-        During the initial exploration phase, it returns a random action.
-        Otherwise, it uses the policy network to sample an action.
-        """
-        # Take random actions until the replay buffer has collected a minimum number of experiences
-        if len(self.replay_memory) < self.min_replay_memory_size:
+        if training and len(self.replay_memory) < self.min_replay_memory_size:
             return random.randrange(self.action_dim)
-
-        # state is a LazyFrame or np.array
+        
         state_arr = np.array(state, dtype=np.uint8)
-        # Add a batch dimension, convert to float tensor, normalize, and send to device
         state_tensor = torch.as_tensor(state_arr, dtype=torch.float32, device=self.device).unsqueeze(0) / 255.0
+        
+        self.actor.eval()
+        pi = self.actor(state_tensor)
+        self.actor.train()
 
-        # Set the network to evaluation or training mode and get action probabilities
-        self.actor.train(training)
-        with torch.no_grad():
-            pi = self.actor(state_tensor)
-
-            # Use Categorical distribution for sampling
-            dist = torch.distributions.Categorical(probs=pi)
-            action = dist.sample()
-
-        # Return the action as a Python integer
+        dist = torch.distributions.Categorical(probs=pi)
+        action = dist.sample()
         return action.item()
+
+    def sample_action(self, states):
+        probs = self.actor(states)
+        dist = torch.distributions.Categorical(probs=probs)
+        actions = dist.sample()
+        log_probs = dist.log_prob(actions)
+        return actions, log_probs, probs
+
+    def learn(self):
+        if len(self.replay_memory) < self.batch_size:
+            return None, None
+
+        # 1. Sample from replay buffer
+        experiences = self._sample_experience()
+        states, actions, rewards, next_states, dones = zip(*experiences)
+
+        # 2. Convert to tensors
+        states = torch.from_numpy(np.array(states, dtype=np.uint8)).float().to(self.device) / 255.0
+        actions = torch.tensor(actions, dtype=torch.int64, device=self.device).unsqueeze(1)
+        rewards = torch.tensor(rewards, dtype=torch.float32, device=self.device).unsqueeze(1)
+        next_states = torch.from_numpy(np.array(next_states, dtype=np.uint8)).float().to(self.device) / 255.0
+        dones = torch.tensor(dones, dtype=torch.float32, device=self.device).unsqueeze(1)
+
+        # 3. Calculate Critic Target (td_target)
+        with torch.no_grad():
+            _, next_log_probs, next_probs = self.sample_action(next_states)
+            q1_target_next, q2_target_next = self.target_q_network(next_states)
+            min_q_target_next = torch.min(q1_target_next, q2_target_next)
+            
+            # Soft state value V(s_t+1)
+            soft_state_value = (next_probs * (min_q_target_next - self.alpha * next_log_probs.unsqueeze(1))).sum(dim=1, keepdim=True)
+            
+            td_target = rewards + (1 - dones) * self.gamma * soft_state_value
+
+        # 4. Calculate Critic Loss
+        q1_pred, q2_pred = self.q_network(states)
+        q1_pred = q1_pred.gather(1, actions)
+        q2_pred = q2_pred.gather(1, actions)
+
+        critic_loss = F.mse_loss(q1_pred, td_target) + F.mse_loss(q2_pred, td_target)
+
+        # 5. Update Critic
+        self.critic_optimizer.zero_grad()
+        critic_loss.backward()
+        self.critic_optimizer.step()
+
+        # 6. Calculate Actor and Alpha Loss
+        _, log_probs, probs = self.sample_action(states)
+        
+        with torch.no_grad():
+            q1_all, q2_all = self.q_network(states)
+            min_q_all = torch.min(q1_all, q2_all)
+
+        # Actor loss
+        actor_loss = (probs * (self.alpha.detach() * log_probs.unsqueeze(1) - min_q_all)).sum(dim=1).mean()
+        
+        # Alpha loss
+        alpha_loss = -(self.log_alpha * (log_probs.detach() + self.target_entropy)).mean()
+
+        # 7. Update Actor and Alpha
+        self.actor_optimizer.zero_grad()
+        actor_loss.backward()
+        self.actor_optimizer.step()
+
+        self.alpha_optimizer.zero_grad()
+        alpha_loss.backward()
+        self.alpha_optimizer.step()
+        self.alpha = self.log_alpha.exp()
+
+        # 8. Soft update target network
+        for target_param, param in zip(self.target_q_network.parameters(), self.q_network.parameters()):
+            target_param.data.copy_(self.tau * param.data + (1.0 - self.tau) * target_param.data)
+            
+        return actor_loss.item(), critic_loss.item()
