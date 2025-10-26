@@ -103,7 +103,7 @@ class DoubleQNetwork(nn.Module):
 from torch.utils.tensorboard import SummaryWriter
 
 class SACAgent:
-    def __init__(self, state_dim, action_dim, save_dir, lr=3e-4, gamma=0.99, tau=0.005):
+    def __init__(self, state_dim, action_dim, save_dir, actor_lr=3e-5, critic_lr=3e-4, gamma=0.99, tau=0.005):
         self.state_dim = state_dim
         self.action_dim = action_dim
         self.gamma = gamma
@@ -133,14 +133,14 @@ class SACAgent:
         self.target_q_network.load_state_dict(self.q_network.state_dict())
 
         # Optimizers
-        self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), lr=lr)
-        self.critic_optimizer = torch.optim.Adam(self.q_network.parameters(), lr=lr)
+        self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), lr=actor_lr)
+        self.critic_optimizer = torch.optim.Adam(self.q_network.parameters(), lr=critic_lr)
 
         # Temperature parameter for entropy
-        self.log_alpha = torch.tensor(np.log(0.01), dtype=torch.float32, device=self.device, requires_grad=True)
+        self.log_alpha = torch.tensor(np.log(0.2), dtype=torch.float32, device=self.device, requires_grad=True) # 초기 알파값을 0.2로 상향
         self.alpha = self.log_alpha.exp()
         self.target_entropy = -torch.log(1 / torch.tensor(self.action_dim)) * 0.98
-        self.alpha_optimizer = torch.optim.Adam([self.log_alpha], lr=lr)
+        self.alpha_optimizer = torch.optim.Adam([self.log_alpha], lr=critic_lr)
 
         # For logging
         self.writer = SummaryWriter(self.save_dir)

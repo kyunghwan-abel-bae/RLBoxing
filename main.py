@@ -75,7 +75,7 @@ save_dir.mkdir(parents=True)
 checkpoint = None  # Path('checkpoints/2020-10-21T18-25-27/mario.chkpt')
 
 # 16 : batch size
-agent = SACAgent(state_dim=(num_frames, 84, 84), action_dim=env.action_space.n, save_dir=save_dir)
+agent = SACAgent(state_dim=(num_frames, 84, 84), action_dim=env.action_space.n, save_dir=save_dir, actor_lr=3e-6, critic_lr=3e-5)
 
 logger = MetricLogger(save_dir)
 
