@@ -103,13 +103,14 @@ class DoubleQNetwork(nn.Module):
 from torch.utils.tensorboard import SummaryWriter
 
 class SACAgent:
-    def __init__(self, state_dim, action_dim, save_dir, actor_lr=3e-5, critic_lr=3e-4, gamma=0.99, tau=0.005, n_step=3):
+    def __init__(self, state_dim, action_dim, save_dir, actor_lr=3e-5, critic_lr=3e-4, gamma=0.99, tau=0.005, n_step=3, fixed_initial_alpha=0.2, alpha_tuning_start_episode=1000):
         self.state_dim = state_dim
         self.action_dim = action_dim
         self.gamma = gamma
         self.tau = tau
         self.save_dir = save_dir
         self.n_step = n_step
+        self.alpha_tuning_start_episode = alpha_tuning_start_episode
 
         # Device selection
         self.device = "cpu"
@@ -139,8 +140,8 @@ class SACAgent:
         self.critic_optimizer = torch.optim.Adam(self.q_network.parameters(), lr=critic_lr)
 
         # Temperature parameter for entropy
-        self.log_alpha = torch.tensor(np.log(0.2), dtype=torch.float32, device=self.device, requires_grad=True) # 초기 알파값을 0.2로 상향
-        self.alpha = self.log_alpha.exp()
+        self.log_alpha = torch.tensor(np.log(0.2), dtype=torch.float32, device=self.device, requires_grad=True)
+        self.alpha = torch.tensor(fixed_initial_alpha, dtype=torch.float32, device=self.device) # Start with a fixed alpha tensor
         self.target_entropy = -torch.log(1 / torch.tensor(self.action_dim)) * 0.98
         self.alpha_optimizer = torch.optim.Adam([self.log_alpha], lr=critic_lr)
 
@@ -199,7 +200,7 @@ class SACAgent:
         log_probs = dist.log_prob(actions)
         return actions, log_probs, probs
 
-    def learn(self):
+    def learn(self, current_episode):
         if len(self.replay_memory) < self.batch_size:
             return None, None
 
@@ -248,18 +249,19 @@ class SACAgent:
         # Actor loss
         actor_loss = (probs * (self.alpha.detach() * log_probs.unsqueeze(1) - min_q_all)).sum(dim=1).mean()
         
-        # Alpha loss
-        alpha_loss = -(self.log_alpha * (log_probs.detach() + self.target_entropy)).mean()
-
-        # 7. Update Actor and Alpha
+        # 7. Update Actor and (conditionally) Alpha
         self.actor_optimizer.zero_grad()
         actor_loss.backward()
         self.actor_optimizer.step()
 
-        self.alpha_optimizer.zero_grad()
-        alpha_loss.backward()
-        self.alpha_optimizer.step()
-        self.alpha = self.log_alpha.exp()
+        if current_episode >= self.alpha_tuning_start_episode:
+            # Alpha loss
+            alpha_loss = -(self.log_alpha * (log_probs.detach() + self.target_entropy)).mean()
+
+            self.alpha_optimizer.zero_grad()
+            alpha_loss.backward()
+            self.alpha_optimizer.step()
+            self.alpha = self.log_alpha.exp()
 
         # 8. Soft update target network
         for target_param, param in zip(self.target_q_network.parameters(), self.q_network.parameters()):

@@ -77,7 +77,7 @@ save_dir.mkdir(parents=True)
 checkpoint = None  # Path('checkpoints/2020-10-21T18-25-27/mario.chkpt')
 
 # 16 : batch size
-agent = SACAgent(state_dim=(num_frames, 84, 84), action_dim=env.action_space.n, save_dir=save_dir, actor_lr=3e-6, critic_lr=3e-5)
+agent = SACAgent(state_dim=(num_frames, 84, 84), action_dim=env.action_space.n, save_dir=save_dir, actor_lr=3e-6, critic_lr=3e-5, alpha_tuning_start_episode=500)
 
 logger = MetricLogger(save_dir)
 
@@ -112,8 +112,8 @@ for e in range(episodes_start, episodes):
         agent.update_replay_memory(state, action, reward, next_state, done)
 
         # 4. Learn from experiences
-        learn_result = agent.learn()
-        
+        learn_result = agent.learn(e)
+
         # Only record losses if learning has started
         if learn_result and learn_result[0] is not None:
             actor_loss, critic_loss = learn_result
@@ -147,7 +147,7 @@ for e in range(episodes_start, episodes):
         bprint("KNOCK OUT")
         knock_out_count += 1
         # The A2C-specific learning rate decay is removed as it's not standard for SAC with Adam.
-        
+
         agent.save_model(e) # Save model on knockout
 
         bprint(f"sum(last 3 total rewards) : {sum(last_3_total_rewards)}")
@@ -158,7 +158,7 @@ for e in range(episodes_start, episodes):
         print(f"total reward : {total_reward}")
 
         capture_state(state, e)
-        
+
         agent.save_model(e) # Save model periodically
 
         # The filename logic was specific to A2C and has been simplified.
