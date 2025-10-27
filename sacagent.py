@@ -103,12 +103,13 @@ class DoubleQNetwork(nn.Module):
 from torch.utils.tensorboard import SummaryWriter
 
 class SACAgent:
-    def __init__(self, state_dim, action_dim, save_dir, actor_lr=3e-5, critic_lr=3e-4, gamma=0.99, tau=0.005):
+    def __init__(self, state_dim, action_dim, save_dir, actor_lr=3e-5, critic_lr=3e-4, gamma=0.99, tau=0.005, n_step=3):
         self.state_dim = state_dim
         self.action_dim = action_dim
         self.gamma = gamma
         self.tau = tau
         self.save_dir = save_dir
+        self.n_step = n_step
 
         # Device selection
         self.device = "cpu"
@@ -120,6 +121,7 @@ class SACAgent:
         # Replay Memory
         self.min_replay_memory_size = 1000
         self.replay_memory = deque(maxlen=100000)
+        self.n_step_buffer = [] # For N-step returns
         self.batch_size = 32
         
         # Network dimensions
@@ -148,7 +150,28 @@ class SACAgent:
     def update_replay_memory(self, state, action, reward, next_state, done):
         state_arr = np.array(state, dtype=np.uint8)
         next_state_arr = np.array(next_state, dtype=np.uint8)
-        self.replay_memory.append((state_arr, action, reward, next_state_arr, done))
+        self.n_step_buffer.append((state_arr, action, reward, next_state_arr, done))
+
+        if len(self.n_step_buffer) < self.n_step:
+            return
+
+        # Calculate the n-step return for the oldest transition in the buffer
+        n_step_reward = sum([(self.gamma**i) * self.n_step_buffer[i][2] for i in range(self.n_step)])
+        
+        # The transition to store is the one at the beginning of the buffer
+        start_state, action, _, _, _ = self.n_step_buffer[0]
+        # The "next_state" for the n-step return is the state after the last transition in the buffer
+        _, _, _, end_next_state, end_done = self.n_step_buffer[-1]
+
+        # Add the processed n-step transition to the main replay buffer
+        self.replay_memory.append((start_state, action, n_step_reward, end_next_state, end_done))
+
+        # Remove the oldest transition
+        self.n_step_buffer.pop(0)
+
+        # If the episode ended, clear the buffer to not carry over transitions between episodes
+        if done:
+            self.n_step_buffer.clear()
 
     def _sample_experience(self):
         return random.sample(self.replay_memory, self.batch_size)
@@ -197,10 +220,11 @@ class SACAgent:
             q1_target_next, q2_target_next = self.target_q_network(next_states)
             min_q_target_next = torch.min(q1_target_next, q2_target_next)
             
-            # Soft state value V(s_t+1)
+            # Soft state value V(s_{t+n})
             soft_state_value = (next_probs * (min_q_target_next - self.alpha * next_log_probs.unsqueeze(1))).sum(dim=1, keepdim=True)
             
-            td_target = rewards + (1 - dones) * self.gamma * soft_state_value
+            # The TD target now uses the n-step reward and gamma^n
+            td_target = rewards + (1 - dones) * (self.gamma ** self.n_step) * soft_state_value
 
         # 4. Calculate Critic Loss
         q1_pred, q2_pred = self.q_network(states)
