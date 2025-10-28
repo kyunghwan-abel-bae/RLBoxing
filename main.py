@@ -13,6 +13,10 @@ from gym import spaces
 
 from utils import *
 
+# Set seed for reproducibility
+SEED = 0
+seed_all(SEED)
+
 from collections import deque
 
 import matplotlib.pyplot as plt
