@@ -103,21 +103,15 @@ class DoubleQNetwork(nn.Module):
 from torch.utils.tensorboard import SummaryWriter
 
 class SACAgent:
-    def __init__(self, state_dim, action_dim, save_dir, actor_lr=3e-5, critic_lr=3e-4, gamma=0.99, tau=0.005, n_step=3, fixed_initial_alpha=0.2, alpha_tuning_start_episode=1000):
+    def __init__(self, state_dim, action_dim, save_dir, device, actor_lr=3e-5, critic_lr=3e-4, gamma=0.99, tau=0.005, n_step=3, fixed_initial_alpha=0.2, alpha_tuning_start_episode=1000):
         self.state_dim = state_dim
         self.action_dim = action_dim
         self.gamma = gamma
         self.tau = tau
         self.save_dir = save_dir
+        self.device = device
         self.n_step = n_step
         self.alpha_tuning_start_episode = alpha_tuning_start_episode
-
-        # Device selection
-        self.device = "cpu"
-        if torch.cuda.is_available():
-            self.device = "cuda"
-        elif torch.backends.mps.is_available():
-            self.device = "mps"
 
         # Replay Memory
         self.min_replay_memory_size = 1000
