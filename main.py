@@ -22,11 +22,33 @@ import matplotlib.pyplot as plt
 class CustomActionSpaceWrapper(gym.ActionWrapper):
     def __init__(self, env):
         super(CustomActionSpaceWrapper, self).__init__(env)
-        # ... (rest of class is unchanged)
+
+        # When the observation issues are occurred, then customize below.
+        # self.observation_space = Box(low=0, high=255, shape=(210, 160, 3), dtype=np.int32)
+
+        # Define the new action space, for example restricting the actions to 0, 1, and 2
+        # self.action_space = spaces.Discrete(8)
+
+    def action(self, act):
+        original_action = act + 10
+        return original_action
 
 
 def capture_state(input, ep):
-    # ... (function is unchanged)
+    count = input.shape[0]
+    fig, ax = plt.subplots(1, count, figsize=(count * 2, 2))
+    axes = ax.flatten()
+
+    for i in range(count):
+        axes[i].imshow(input[i])
+        axes[i].axis('off')
+
+    date_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+
+    filename = f"{date_time}_{ep}_{count}stacks"
+
+    plt.savefig(filename, bbox_inches='tight', pad_inches=0.1)
+    plt.close()
 
 
 def main():
