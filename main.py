@@ -65,7 +65,7 @@ def main():
             device = 'mps'
         else:
             device = 'cpu'
-    print(f"--- Using device: {device} ---")
+    print(f"{'='*20}\n  Using device: {device}\n{'='*20}")
     # --------------------
 
     # Set seed for reproducibility
