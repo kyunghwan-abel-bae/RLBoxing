@@ -77,8 +77,9 @@ def main():
         action_dim=env.action_space.n, 
         save_dir=save_dir, 
         device=device, 
-        actor_lr=3e-6, 
-        critic_lr=3e-5, 
+        n_step=1,
+        actor_lr=3e-4, 
+        critic_lr=3e-4, 
         alpha_tuning_start_episode=500
     )
 
