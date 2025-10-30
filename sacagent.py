@@ -136,7 +136,7 @@ class SACAgent:
         # Temperature parameter for entropy
         self.log_alpha = torch.tensor(np.log(0.2), dtype=torch.float32, device=self.device, requires_grad=True)
         self.alpha = torch.tensor(fixed_initial_alpha, dtype=torch.float32, device=self.device) # Start with a fixed alpha tensor
-        self.target_entropy = -torch.log(1 / torch.tensor(self.action_dim)) * 0.98
+        self.target_entropy = -np.log(self.action_dim)
         self.alpha_optimizer = torch.optim.Adam([self.log_alpha], lr=critic_lr)
 
         # For logging
