@@ -56,7 +56,7 @@ def main():
     choice = input("Enter device to use (auto, cpu, cuda, mps) [default: auto]: ").strip().lower()
     if not choice:
         choice = 'auto'
-    
+
     device = choice
     if device == 'auto':
         if torch.cuda.is_available():
@@ -73,7 +73,7 @@ def main():
     seed_all(SEED)
 
     env = gym.make('BoxingDeterministic-v4', render_mode="rgb_array")
-    
+
     num_frames = 4
 
     env = AdapterGrayScaleObservation(env)
@@ -95,14 +95,14 @@ def main():
     checkpoint = None
 
     agent = SACAgent(
-        state_dim=(num_frames, 84, 84), 
-        action_dim=env.action_space.n, 
-        save_dir=save_dir, 
-        device=device, 
+        state_dim=(num_frames, 84, 84),
+        action_dim=env.action_space.n,
+        save_dir=save_dir,
+        device=device,
         n_step=1,
-        actor_lr=3e-4, 
-        critic_lr=3e-4, 
-        alpha_tuning_start_episode=500
+        actor_lr=3e-5,
+        critic_lr=3e-5,
+        alpha_tuning_start_episode=100
     )
 
     logger = MetricLogger(save_dir)
