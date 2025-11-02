@@ -231,6 +231,7 @@ class SACAgent:
         # 5. Update Critic
         self.critic_optimizer.zero_grad()
         critic_loss.backward()
+        torch.nn.utils.clip_grad_norm_(self.q_network.parameters(), 1.0)
         self.critic_optimizer.step()
 
         # 6. Calculate Actor and Alpha Loss
