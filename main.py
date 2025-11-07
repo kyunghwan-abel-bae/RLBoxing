@@ -1,6 +1,8 @@
+import argparse
 import datetime
 import torch
 from pathlib import Path
+import itertools
 
 import gymnasium as gym
 import numpy as np
@@ -67,12 +69,18 @@ def capture_state(input_data, name):
 
 
 def main():
-    # --- Device Setup ---
-    choice = input("Enter device to use (auto, cpu, cuda, mps) [default: auto]: ").strip().lower()
-    if not choice:
-        choice = 'auto'
+    # --- Argument Parsing ---
+    parser = argparse.ArgumentParser(description="Run RL experiments with different hyperparameters.")
+    parser.add_argument("--device", type=str, default="auto", choices=['auto', 'cpu', 'cuda', 'mps'], help="Device to use for training.")
+    args = parser.parse_args()
 
-    device = choice
+    # --- Hyperparameter Setup ---
+    list_stacks = [2, 3]
+    list_steps = [1, 2, 3, 4, 5]
+    episodes_per_experiment = 300
+
+    # --- Device Setup ---
+    device = args.device
     if device == 'auto':
         if torch.cuda.is_available():
             device = 'cuda'
@@ -80,115 +88,109 @@ def main():
             device = 'mps'
         else:
             device = 'cpu'
-    print(f"{'='*20}\n  Using device: {device}\n{'='*20}")
+    print(f"{ '='*20}\n  Using device: {device}\n{'='*20}")
     # --------------------
 
-    # Set seed for reproducibility
-    SEED = 0
-    seed_all(SEED)
+    # --- Main Experiment Loop ---
+    for num_frames, n_step in itertools.product(list_stacks, list_steps):
+        print(f"\n\n{'='*50}")
+        print(f"  Starting Experiment: FrameStack={num_frames}, n-step={n_step}")
+        print(f"{ '='*50}\n")
 
-    env = gym.make('BoxingDeterministic-v4', render_mode="rgb_array")
+        # Set seed for reproducibility for each experiment
+        SEED = 0
+        seed_all(SEED)
 
-    num_frames = 4
+        # --- Environment Setup ---
+        env = gym.make('BoxingDeterministic-v4', render_mode="rgb_array")
+        env = AdapterGrayScaleObservation(env)
+        env = GrayScaleObservation(env, keep_dim=False)
+        env = ResizeObservation(env, shape=84)
+        env = TransformObservation(env, f=lambda x: x / 255.)
+        env = FrameStack(env, num_stack=num_frames)
+        env.reset()
 
-    env = AdapterGrayScaleObservation(env)
-    print(f"1 env state : {env.observation_space}")
-    env = GrayScaleObservation(env, keep_dim=False)
-    print(f"2 env state : {env.observation_space}")
-    env = ResizeObservation(env, shape=84)
-    print(f"3 env state : {env.observation_space}")
-    env = TransformObservation(env, f=lambda x: x / 255.)
-    print(f"4 env state : {env.observation_space}")
-    env = FrameStack(env, num_stack=num_frames)
-    print(f"5 env state : {env.observation_space}")
+        # --- Directory Setup for this experiment ---
+        experiment_name = f"stack_{num_frames}_nstep_{n_step}"
+        save_dir = Path("checkpoints") / experiment_name / datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')
+        save_dir.mkdir(parents=True)
 
-    env.reset()
+        # --- Agent Initialization ---
+        agent = SACAgent(
+            state_dim=(num_frames, 84, 84),
+            action_dim=env.action_space.n,
+            save_dir=save_dir,
+            device=device,
+            n_step=n_step,
+            actor_lr=3e-5,
+            critic_lr=3e-5,
+            alpha_tuning_start_episode=100,
+            capture_state_func=capture_state,
+            capture_episode_freq=50
+        )
 
-    save_dir = Path("checkpoints") / datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')
-    save_dir.mkdir(parents=True)
+        logger = MetricLogger(save_dir)
 
-    checkpoint = None
+        # --- Training Loop for this experiment ---
+        episodes_start = 0
+        best_score = 0
+        best_e = 0
+        last_3_total_rewards = deque(maxlen=4)
+        knock_out_count = 0
 
-    agent = SACAgent(
-        state_dim=(num_frames, 84, 84),
-        action_dim=env.action_space.n,
-        save_dir=save_dir,
-        device=device,
-        n_step=5,
-        actor_lr=3e-5,
-        critic_lr=3e-5,
-        alpha_tuning_start_episode=100,
-        capture_state_func=capture_state,
-        capture_episode_freq=50
-    )
+        for e in range(episodes_start, episodes_per_experiment):
+            state, info = env.reset()
+            total_reward = 0
+            step_count = 0
+            actor_losses, critic_losses, scores = [], [], []
 
-    logger = MetricLogger(save_dir)
+            while True:
+                step_count += 1
+                action = agent.act(state)
+                next_state, reward, terminated, truncated, info = env.step(action)
+                done = terminated or truncated
+                total_reward += reward if reward > 0 else 0
+                agent.update_replay_memory(state, action, reward, next_state, done, e, step_count)
+                learn_result = agent.learn(e)
 
-    episodes_start = 0
-    if checkpoint:
-        episodes_start = agent.data_load.get("episode") + 1
+                if learn_result and learn_result[0] is not None:
+                    actor_loss, critic_loss = learn_result
+                    actor_losses.append(actor_loss)
+                    critic_losses.append(critic_loss)
 
-    episodes = 3000
-    best_score = 0
-    best_e = 0
+                state = next_state
 
-    last_3_total_rewards = deque(maxlen=4)
-    knock_out_count = 0
+                if done or (total_reward > 99):
+                    break
 
-    for e in range(episodes_start, episodes):
-        state, info = env.reset()
-        total_reward = 0
-        step_count = 0
+            if best_score < total_reward:
+                best_score = total_reward
+                best_e = e
 
-        actor_losses, critic_losses, scores = [], [], []
+            mean_actor_loss = np.mean(actor_losses) if actor_losses else 0
+            mean_critic_loss = np.mean(critic_losses) if critic_losses else 0
 
-        while True:
-            step_count += 1
-            action = agent.act(state)
-            next_state, reward, terminated, truncated, info = env.step(action)
-            done = terminated or truncated
-            total_reward += reward if reward > 0 else 0
-            agent.update_replay_memory(state, action, reward, next_state, done, e, step_count)
-            learn_result = agent.learn(e)
+            if mean_actor_loss != 0 and mean_critic_loss != 0:
+                alpha_value = agent.alpha.item() if torch.is_tensor(agent.alpha) else agent.alpha
+                agent.write_summary(total_reward, mean_actor_loss, mean_critic_loss, alpha_value, e)
 
-            if learn_result and learn_result[0] is not None:
-                actor_loss, critic_loss = learn_result
-                actor_losses.append(actor_loss)
-                critic_losses.append(critic_loss)
-
-            state = next_state
-
-            if done or (total_reward > 99):
-                break
-
-        if best_score < total_reward:
-            best_score = total_reward
-            best_e = e
-
-        mean_actor_loss = np.mean(actor_losses) if actor_losses else 0
-        mean_critic_loss = np.mean(critic_losses) if critic_losses else 0
-
-        if mean_actor_loss != 0 and mean_critic_loss != 0:
             alpha_value = agent.alpha.item() if torch.is_tensor(agent.alpha) else agent.alpha
-            agent.write_summary(total_reward, mean_actor_loss, mean_critic_loss, alpha_value, e)
+            bprint(f"[Exp: {experiment_name}] [episode {e}] best_score at {best_e} : {best_score}, knockout_count : {knock_out_count}, total_reward : {total_reward}, "
+                   f"actor_loss : {mean_actor_loss:.4f}, critic_loss : {mean_critic_loss:.4f}, "
+                   f"alpha: {alpha_value:.4f}")
+            last_3_total_rewards.append(total_reward)
 
-        alpha_value = agent.alpha.item() if torch.is_tensor(agent.alpha) else agent.alpha
-        bprint(f"[episode {e}] best_score at {best_e} : {best_score}, knockout_count : {knock_out_count}, total_reward : {total_reward}, "
-               f"actor_loss : {mean_actor_loss:.4f}, critic_loss : {mean_critic_loss:.4f}, "
-               f"alpha: {alpha_value:.4f}")
-        last_3_total_rewards.append(total_reward)
+            if total_reward > 99:
+                bprint("KNOCK OUT")
+                knock_out_count += 1
+                agent.save_model(e)
+                bprint(f"sum(last 3 total rewards) : {sum(last_3_total_rewards)}")
 
-        if total_reward > 99:
-            bprint("KNOCK OUT")
-            knock_out_count += 1
-            agent.save_model(e)
-            bprint(f"sum(last 3 total rewards) : {sum(last_3_total_rewards)}")
-            if sum(last_3_total_rewards) > 340:
-                break
-
-        if e % 50 == 0 and e > 0:
-            print(f"total reward : {total_reward}")
-            agent.save_model(e)
+            if e % 50 == 0 and e > 0:
+                print(f"total reward : {total_reward}")
+                agent.save_model(e)
+        
+        env.close()
 
 if __name__ == '__main__':
     main()
