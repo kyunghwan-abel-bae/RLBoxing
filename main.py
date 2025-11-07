@@ -34,21 +34,36 @@ class CustomActionSpaceWrapper(gym.ActionWrapper):
         return original_action
 
 
-def capture_state(input, ep):
-    count = input.shape[0]
-    fig, ax = plt.subplots(1, count, figsize=(count * 2, 2))
-    axes = ax.flatten()
+def capture_state(input_data, name):
+    # Ensure the input is a numpy array
+    if isinstance(input_data, torch.Tensor):
+        input_data = input_data.cpu().numpy()
 
-    for i in range(count):
-        axes[i].imshow(input[i])
-        axes[i].axis('off')
+    # Handle frame stacks
+    if len(input_data.shape) == 3:
+        count = input_data.shape[0]
+        fig, axes = plt.subplots(1, count, figsize=(count * 2, 2))
+        if count == 1:
+            axes = [axes]
+        for i in range(count):
+            axes[i].imshow(input_data[i], cmap='gray')
+            axes[i].axis('off')
+    # Handle single frames
+    elif len(input_data.shape) == 2:
+        count = 1
+        fig, ax = plt.subplots(1, 1, figsize=(2, 2))
+        ax.imshow(input_data, cmap='gray')
+        ax.axis('off')
+    else:
+        print(f"capture_state: Invalid input shape {input_data.shape}")
+        return
 
-    date_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-
-    filename = f"{date_time}_{ep}_{count}stacks"
+    screenshots_dir = Path("screenshots")
+    screenshots_dir.mkdir(parents=True, exist_ok=True)
+    filename = screenshots_dir / f"{name}_{count}stacks.png"
 
     plt.savefig(filename, bbox_inches='tight', pad_inches=0.1)
-    plt.close()
+    plt.close(fig)
 
 
 def main():
@@ -99,10 +114,12 @@ def main():
         action_dim=env.action_space.n,
         save_dir=save_dir,
         device=device,
-        n_step=1,
+        n_step=5,
         actor_lr=3e-5,
         critic_lr=3e-5,
-        alpha_tuning_start_episode=100
+        alpha_tuning_start_episode=100,
+        capture_state_func=capture_state,
+        capture_episode_freq=50
     )
 
     logger = MetricLogger(save_dir)
@@ -121,15 +138,17 @@ def main():
     for e in range(episodes_start, episodes):
         state, info = env.reset()
         total_reward = 0
+        step_count = 0
 
         actor_losses, critic_losses, scores = [], [], []
 
         while True:
+            step_count += 1
             action = agent.act(state)
             next_state, reward, terminated, truncated, info = env.step(action)
             done = terminated or truncated
             total_reward += reward if reward > 0 else 0
-            agent.update_replay_memory(state, action, reward, next_state, done)
+            agent.update_replay_memory(state, action, reward, next_state, done, e, step_count)
             learn_result = agent.learn(e)
 
             if learn_result and learn_result[0] is not None:
@@ -169,7 +188,6 @@ def main():
 
         if e % 50 == 0 and e > 0:
             print(f"total reward : {total_reward}")
-            capture_state(state, e)
             agent.save_model(e)
 
 if __name__ == '__main__':

@@ -103,7 +103,7 @@ class DoubleQNetwork(nn.Module):
 from torch.utils.tensorboard import SummaryWriter
 
 class SACAgent:
-    def __init__(self, state_dim, action_dim, save_dir, device, actor_lr=3e-5, critic_lr=3e-4, gamma=0.99, tau=0.005, n_step=3, fixed_initial_alpha=0.2, alpha_tuning_start_episode=1000):
+    def __init__(self, state_dim, action_dim, save_dir, device, actor_lr=3e-5, critic_lr=3e-4, gamma=0.99, tau=0.005, n_step=3, fixed_initial_alpha=0.2, alpha_tuning_start_episode=1000, capture_state_func=None, capture_episode_freq=100):
         self.state_dim = state_dim
         self.action_dim = action_dim
         self.gamma = gamma
@@ -112,6 +112,8 @@ class SACAgent:
         self.device = device
         self.n_step = n_step
         self.alpha_tuning_start_episode = alpha_tuning_start_episode
+        self.capture_state_func = capture_state_func
+        self.capture_episode_freq = capture_episode_freq
 
         # Replay Memory
         self.min_replay_memory_size = 1000
@@ -142,13 +144,16 @@ class SACAgent:
         # For logging
         self.writer = SummaryWriter(self.save_dir)
 
-    def update_replay_memory(self, state, action, reward, next_state, done):
-        state_arr = np.array(state, dtype=np.uint8)
-        next_state_arr = np.array(next_state, dtype=np.uint8)
+    def update_replay_memory(self, state, action, reward, next_state, done, episode, step):
+        state_arr = np.array(state)
+        next_state_arr = np.array(next_state)
         self.n_step_buffer.append((state_arr, action, reward, next_state_arr, done))
 
         if len(self.n_step_buffer) < self.n_step:
             return
+
+        if self.capture_state_func and episode > 0 and episode % self.capture_episode_freq == 0 and 50 <= step <= 60:
+            self.capture_state_func(state_arr, f"e{episode}_s{step}")
 
         # Calculate the n-step return for the oldest transition in the buffer
         n_step_reward = sum([(self.gamma**i) * self.n_step_buffer[i][2] for i in range(self.n_step)])
@@ -176,8 +181,8 @@ class SACAgent:
         if training and len(self.replay_memory) < self.min_replay_memory_size:
             return random.randrange(self.action_dim)
         
-        state_arr = np.array(state, dtype=np.uint8)
-        state_tensor = torch.as_tensor(state_arr, dtype=torch.float32, device=self.device).unsqueeze(0) / 255.0
+        state_arr = np.array(state)
+        state_tensor = torch.as_tensor(state_arr, dtype=torch.float32, device=self.device).unsqueeze(0)
         
         self.actor.eval()
         pi = self.actor(state_tensor)
@@ -203,10 +208,10 @@ class SACAgent:
         states, actions, rewards, next_states, dones = zip(*experiences)
 
         # 2. Convert to tensors
-        states = torch.from_numpy(np.array(states, dtype=np.uint8)).float().to(self.device) / 255.0
+        states = torch.from_numpy(np.array(states)).float().to(self.device)
         actions = torch.tensor(actions, dtype=torch.int64, device=self.device).unsqueeze(1)
         rewards = torch.tensor(rewards, dtype=torch.float32, device=self.device).unsqueeze(1)
-        next_states = torch.from_numpy(np.array(next_states, dtype=np.uint8)).float().to(self.device) / 255.0
+        next_states = torch.from_numpy(np.array(next_states)).float().to(self.device)
         dones = torch.tensor(dones, dtype=torch.float32, device=self.device).unsqueeze(1)
 
         # 3. Calculate Critic Target (td_target)

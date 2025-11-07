@@ -1,5 +1,6 @@
 checkpoints/*
 saved_a2c/*
+screenshots/*
 *.png
 *.txt
 __pycache__/*
