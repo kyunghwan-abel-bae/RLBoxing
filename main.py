@@ -3,6 +3,7 @@ import datetime
 import torch
 from pathlib import Path
 import itertools
+import time
 
 import gymnasium as gym
 import numpy as np
@@ -77,7 +78,9 @@ def main():
     # --- Hyperparameter Setup ---
     list_stacks = [2, 3]
     list_steps = [1, 2, 3, 4, 5]
-    episodes_per_experiment = 300
+    list_actor_lr = [3e-5, 1.5e-5, 3e-6]
+    list_critic_lr = [1.5e-4, 3e-5, 1.5e-5, 3e-6]
+    episodes_per_experiment = 300  # Set to 3 for testing
 
     # --- Device Setup ---
     device = args.device
@@ -92,9 +95,12 @@ def main():
     # --------------------
 
     # --- Main Experiment Loop ---
-    for num_frames, n_step in itertools.product(list_stacks, list_steps):
+    hyperparameter_combinations = list(itertools.product(list_stacks, list_steps, list_actor_lr, list_critic_lr))
+    total_experiments = len(hyperparameter_combinations)
+
+    for i, (num_frames, n_step, actor_lr, critic_lr) in enumerate(hyperparameter_combinations):
         print(f"\n\n{'='*50}")
-        print(f"  Starting Experiment: FrameStack={num_frames}, n-step={n_step}")
+        print(f"  Starting Experiment {i+1}/{total_experiments}: FrameStack={num_frames}, n-step={n_step}, actor_lr={actor_lr}, critic_lr={critic_lr}")
         print(f"{ '='*50}\n")
 
         # Set seed for reproducibility for each experiment
@@ -111,7 +117,7 @@ def main():
         env.reset()
 
         # --- Directory Setup for this experiment ---
-        experiment_name = f"stack_{num_frames}_nstep_{n_step}"
+        experiment_name = f"stack_{num_frames}_nstep_{n_step}_actorlr_{actor_lr}_criticlr_{critic_lr}"
         save_dir = Path("checkpoints") / experiment_name / datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')
         save_dir.mkdir(parents=True)
 
@@ -122,11 +128,11 @@ def main():
             save_dir=save_dir,
             device=device,
             n_step=n_step,
-            actor_lr=3e-5,
-            critic_lr=3e-5,
+            actor_lr=actor_lr,
+            critic_lr=critic_lr,
             alpha_tuning_start_episode=100,
             capture_state_func=capture_state,
-            capture_episode_freq=50
+            capture_episode_freq=100
         )
 
         logger = MetricLogger(save_dir)
@@ -191,6 +197,13 @@ def main():
                 agent.save_model(e)
         
         env.close()
+
+        # Pause for 10 minutes before the next experiment
+        if i < total_experiments - 1:
+            print(f"\n{'='*50}")
+            print(f"  Experiment {i+1} finished. Pausing for 10 minutes...")
+            print(f"{'='*50}\n")
+            time.sleep(600)
 
 if __name__ == '__main__':
     main()
