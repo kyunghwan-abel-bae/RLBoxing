@@ -145,8 +145,8 @@ class SACAgent:
         self.writer = SummaryWriter(self.save_dir)
 
     def update_replay_memory(self, state, action, reward, next_state, done, episode, step):
-        state_arr = np.array(state)
-        next_state_arr = np.array(next_state)
+        state_arr = np.array(state, dtype=np.float32)
+        next_state_arr = np.array(next_state, dtype=np.float32)
         self.n_step_buffer.append((state_arr, action, reward, next_state_arr, done))
 
         if len(self.n_step_buffer) < self.n_step:
