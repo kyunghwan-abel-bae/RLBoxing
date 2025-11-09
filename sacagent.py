@@ -282,6 +282,21 @@ class SACAgent:
             "log_alpha": self.log_alpha,
         }, save_path)
 
+    def load_model(self, path):
+        print(f"... Load Model from {path}")
+        checkpoint = torch.load(path, map_location=self.device)
+        self.actor.load_state_dict(checkpoint["actor_state_dict"])
+        self.q_network.load_state_dict(checkpoint["critic_state_dict"])
+        self.target_q_network.load_state_dict(checkpoint["critic_state_dict"])
+        self.actor_optimizer.load_state_dict(checkpoint["actor_optimizer_state_dict"])
+        self.critic_optimizer.load_state_dict(checkpoint["critic_optimizer_state_dict"])
+        self.alpha_optimizer.load_state_dict(checkpoint["alpha_optimizer_state_dict"])
+        self.log_alpha = checkpoint["log_alpha"]
+        self.actor.eval()
+        self.q_network.eval()
+        self.target_q_network.eval()
+        return checkpoint["episode"]
+
     def write_summary(self, score, actor_loss, critic_loss, alpha, step):
         self.writer.add_scalar("run/score", score, step)
         self.writer.add_scalar("loss/actor_loss", actor_loss, step)
