@@ -42,7 +42,7 @@ def main():
 
     # --- Environment Setup ---
     # Use render_mode='human' to see the agent play.
-    env = gym.make('BoxingDeterministic-v4', render_mode="human")
+    env = gym.make('BoxingDeterministic-v4', render_mode="human", difficulty=0)
     env = AdapterGrayScaleObservation(env)
     env = GrayScaleObservation(env, keep_dim=False)
     env = ResizeObservation(env, shape=84)
