@@ -2,6 +2,7 @@ checkpoints/*
 saved_a2c/*
 screenshots/*
 replay_logs/*
+videos/*
 *.png
 *.txt
 __pycache__/*
