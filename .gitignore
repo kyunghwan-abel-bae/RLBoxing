@@ -6,3 +6,4 @@ videos/*
 *.png
 *.txt
 __pycache__/*
+vs_agent_logs/*
